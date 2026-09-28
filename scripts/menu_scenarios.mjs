@@ -138,6 +138,8 @@ const withTimeout = (promise, ms) =>
   if (result.spaces < 2) throw new Error("couldn't create a second space");
 }
 
+const pageTabs = new WeakSet();
+
 /**
  * Right-clicks an element of the test page, the way a user would.
  *
@@ -149,13 +151,21 @@ const withTimeout = (promise, ms) =>
 async function rightClick(marionette, pageUrl, selector, { selectText } = {}) {
   await marionette.send("Marionette:SetContext", { value: "content" });
   try {
-    for (const handle of await marionette.send("WebDriver:GetWindowHandles")) {
-      await marionette.send("WebDriver:SwitchToWindow", {
-        handle,
-        focus: true,
-      });
-      const { value: url } = await marionette.send("WebDriver:GetCurrentURL");
-      if (url == pageUrl) break;
+    // Find the test page's tab once; Marionette stays on it afterwards.
+    if (!pageTabs.has(marionette)) {
+      for (const handle of await marionette.send(
+        "WebDriver:GetWindowHandles",
+      )) {
+        await marionette.send("WebDriver:SwitchToWindow", {
+          handle,
+          focus: true,
+        });
+        const { value: url } = await marionette.send("WebDriver:GetCurrentURL");
+        if (url == pageUrl) {
+          pageTabs.add(marionette);
+          break;
+        }
+      }
     }
     await marionette.run(
       `getSelection().removeAllRanges();

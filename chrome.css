@@ -503,6 +503,14 @@
   #context-savelink {
     display: none !important;
   }
+  /* On a page, "Save Page As" and "Select All" are the only items between two
+   * separators. With both hidden, drop the lower separator. */
+  @media -moz-pref("uc.hidecontext.selectalltext") {
+    #contentAreaContextMenu:has(> #context-savepage:not([hidden]))
+      > #context-sep-selectall {
+      display: none !important;
+    }
+  }
 }
 
 /* Hide "Pin Tab" and "Add to Essentials" */
