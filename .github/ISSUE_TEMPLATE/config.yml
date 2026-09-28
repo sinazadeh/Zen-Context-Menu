@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Installation
+    url: https://github.com/sinazadeh/Zen-Context-Menu#installation
+    about: Setup steps for Sine and manual installs, and the macOS native menu setting.

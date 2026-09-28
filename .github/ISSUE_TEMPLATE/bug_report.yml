@@ -1,0 +1,56 @@
+name: Bug report
+description: An option doesn't work, or a menu looks wrong
+labels: ["bug"]
+assignees:
+  - sinazadeh
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! On macOS, please check [the macOS note](https://github.com/sinazadeh/Zen-Context-Menu#macos) first: native menus can't be styled by mods.
+
+  - type: input
+    id: zen-version
+    attributes:
+      label: Zen version
+      description: From `about:support` → Application Basics → Version.
+      placeholder: e.g. 1.22.3b
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: e.g. Windows 11, macOS 15, Arch Linux + Hyprland
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loader
+    attributes:
+      label: How is the mod installed?
+      options:
+        - Sine
+        - Manually (userChrome.css)
+        - Zen's mod store version (not this fork)
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: options
+    attributes:
+      label: Which option(s)?
+      description: As shown in the mod's settings, or the preference name from `about:config`.
+      placeholder: e.g. Hide 'Move to Folder' / uc.hidecontext.movetofolder
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Which menu (tab, link, image, text field...), what you expected, and what happened instead. A screenshot of the menu helps a lot.
+    validations:
+      required: true

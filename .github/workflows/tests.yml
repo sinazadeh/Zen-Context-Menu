@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: ["main"]
+
+jobs:
+  unit:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # preferences.json <-> chrome.css consistency, CSS conventions and the
+      # selector helpers. Opening real menus still needs the manual checks in
+      # AGENTS.md.
+      - name: Run tests
+        run: node --test "tests/*.test.mjs"

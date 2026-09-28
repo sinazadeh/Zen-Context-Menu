@@ -1,0 +1,46 @@
+# Opens the context menus in the latest Zen release for Linux, with each
+# option on, and checks what they show (see scripts/check_menus.mjs and
+# "Keeping up with Zen" in AGENTS.md). Runs weekly, so a Zen update that
+# breaks an option shows up quickly, and on pull requests that change the
+# mod or the check.
+
+name: Menus
+
+on:
+  schedule:
+    # Every Wednesday at 08:00 UTC
+    - cron: "0 8 * * 3"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Zen release to test (default: the latest)"
+        required: false
+        default: ""
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "chrome.css"
+      - "preferences.json"
+      - "scripts/**"
+      - ".github/workflows/menus.yml"
+
+jobs:
+  menus:
+    name: Check menus in Zen
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Check menus
+        env:
+          MOZ_HEADLESS: "1"
+          VERSION: ${{ inputs.version }}
+        run: node scripts/check_menus.mjs ${VERSION:+--version=$VERSION}

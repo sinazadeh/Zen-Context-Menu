@@ -1,0 +1,28 @@
+name: Prettier
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: ["main"]
+
+jobs:
+  prettier:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # Keep the version in sync with the local setup in CONTRIBUTING.md so
+      # local and CI formatting never disagree.
+      - name: Check formatting
+        run: npx --yes prettier@3.9.9 --check "**/*.{css,mjs,md,json,yml}"

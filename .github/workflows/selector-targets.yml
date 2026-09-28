@@ -1,0 +1,41 @@
+# Checks every menu id, class and icon chrome.css uses against the latest Zen
+# release and Zen's development branch (and the Firefox version each is built
+# on), every week. A red "release" run means an option likely stopped working
+# for users; a red "dev" run is an early warning. See
+# scripts/check_selector_targets.mjs and "Keeping up with Zen" in AGENTS.md.
+
+name: Selector targets
+
+on:
+  schedule:
+    # Every Wednesday at 07:00 UTC
+    - cron: "0 7 * * 3"
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "chrome.css"
+      - "scripts/**"
+      - ".github/workflows/selector-targets.yml"
+
+jobs:
+  check:
+    name: Zen ${{ matrix.ref }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        ref: [release, dev]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Check selector targets
+        run: node scripts/check_selector_targets.mjs "${{ matrix.ref }}"
