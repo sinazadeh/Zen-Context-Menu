@@ -37,7 +37,12 @@ import {
   lintSeparators,
 } from "./css_targets.mjs";
 import { Marionette } from "./marionette.mjs";
-import { SCENARIOS, setUpWindow, TEST_PAGE } from "./menu_scenarios.mjs";
+import {
+  SCENARIOS,
+  setUpWindow,
+  TEST_IMAGE,
+  TEST_PAGE,
+} from "./menu_scenarios.mjs";
 import { downloadZen, latestZenRelease } from "./zen_release.mjs";
 
 const ROOT = new URL("..", import.meta.url);
@@ -115,6 +120,11 @@ async function main() {
   );
   const blocks = extractOptionBlocks(css);
   const only = args.only ? new Set(args.only.split(",")) : null;
+  // Options that change how menus look rather than hiding items.
+  const appearanceOptions = new Set([
+    "uc.hidecontext.icons",
+    "uc.hidecontext.separators",
+  ]);
   const hideOptions = options.filter(
     (option) =>
       option.startsWith("uc.hidecontext.") && (!only || only.has(option)),
@@ -144,6 +154,7 @@ async function main() {
   );
   const pagePath = join(profile, "test-page.html");
   await writeFile(pagePath, TEST_PAGE);
+  await writeFile(join(profile, "test-image.png"), TEST_IMAGE);
   const pageUrl = pathToFileURL(pagePath).href;
 
   const browser = spawn(
@@ -221,32 +232,37 @@ async function main() {
     for (const option of hideOptions) {
       const targets = extractSelectorTargets(blocks.get(option) ?? "").ids;
       const alone = await check(option, { [option]: true });
-      let hidSomething = false;
-      let hasTargets = false;
-      for (const [menu, entries] of alone) {
-        // A submenu the option made unreachable (Move Tab) is covered by its
-        // parent menu.
-        if (!entries) continue;
-        const before = itemsOf(none.get(menu));
-        const after = itemsOf(entries);
-        for (const item of before) {
-          if (targets.has(item)) hasTargets = true;
-          if (after.has(item)) continue;
-          hidSomething = true;
-          if (!targets.has(item)) fail(option, menu, `also hides ${item}`);
+      // Appearance options (icons, separators) don't hide items.
+      if (!appearanceOptions.has(option)) {
+        let hidSomething = false;
+        let hasTargets = false;
+        for (const [menu, entries] of alone) {
+          // A submenu the option made unreachable (Move Tab) is covered by its
+          // parent menu.
+          if (!entries) continue;
+          const before = itemsOf(none.get(menu));
+          const after = itemsOf(entries);
+          for (const item of before) {
+            if (targets.has(item)) hasTargets = true;
+            if (after.has(item)) continue;
+            hidSomething = true;
+            if (!targets.has(item)) fail(option, menu, `also hides ${item}`);
+          }
+          for (const item of after) {
+            if (!before.has(item)) fail(option, menu, `makes ${item} appear`);
+          }
         }
-        for (const item of after) {
-          if (!before.has(item)) fail(option, menu, `makes ${item} appear`);
+        if (!hidSomething && hasTargets) {
+          fail(
+            option,
+            "all menus",
+            "hides nothing, though its items are showing",
+          );
+        } else if (!hidSomething) {
+          notes.push(
+            `${option}: none of its items show up in the tested menus`,
+          );
         }
-      }
-      if (!hidSomething && hasTargets) {
-        fail(
-          option,
-          "all menus",
-          "hides nothing, though its items are showing",
-        );
-      } else if (!hidSomething) {
-        notes.push(`${option}: none of its items show up in the tested menus`);
       }
       if (!defaults[option]) {
         await check(`${option} + defaults`, { ...defaults, [option]: true });

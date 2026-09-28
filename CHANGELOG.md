@@ -43,9 +43,10 @@ store and checked against Zen 1.22.3b (Firefox 156).
   line up on every platform. 24 icons that Zen has since removed are replaced
   with current Zen or Firefox icons, and a submenu's icon no longer shows on
   every item inside it.
-- **Hide 'Translate Selection'** and **Hide 'Take Screenshot'** no longer
-  remove the separator above the Inspect items, and **Hide 'This Frame'** only
-  hides that separator along with the submenu.
+- **Hide 'Translate Selection'**, **Hide 'Take Screenshot'** and **Hide
+  'This Frame'** no longer remove the separator above the Inspect items, and
+  hiding "This Frame" no longer leaves two separators next to each other
+  inside frames.
 - `preferences.json` uses real booleans for default values, which the Zen
   theme store's checks require (Sine would also read the text `"false"` as
   on).

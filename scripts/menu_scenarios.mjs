@@ -14,11 +14,19 @@ export const TEST_PAGE = `<!doctype html>
 <style>body { font: 16px sans-serif; margin: 40px } a, img, input, p { display: block; margin: 20px 0 }</style>
 <a id="tracked-link" href="https://example.com/page?utm_source=test&amp;utm_medium=x&amp;id=1">A tracked link</a>
 <a id="plain-link" href="https://example.com/plain">A plain link</a>
-<img id="image" width="64" height="64" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
+<img id="image" width="64" height="64" alt="" src="test-image.png">
 <input id="input" value="some text">
 <p id="paragraph">Selectable paragraph text.</p>
+<iframe id="frame" srcdoc="<p id='inside'>Inside a frame</p>"></iframe>
 <div id="empty" style="height: 200px"></div>
 `;
+
+/** A 1x1 PNG for the test page's image (next to the page, as Firefox treats
+ * data: images differently). */
+export const TEST_IMAGE = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+  "base64",
+);
 
 // Returns the popup's visible entries, top to bottom.
 const DESCRIBE = `
@@ -146,9 +154,15 @@ const pageTabs = new WeakSet();
  * @param {import("./marionette.mjs").Marionette} marionette
  * @param {string} pageUrl
  * @param {string} selector
- * @param {{ selectText?: boolean }} [options]
+ * @param {{ selectText?: boolean, frame?: string }} [options] frame: the
+ *   iframe (a selector in the page) that selector is in
  */
-async function rightClick(marionette, pageUrl, selector, { selectText } = {}) {
+async function rightClick(
+  marionette,
+  pageUrl,
+  selector,
+  { selectText, frame } = {},
+) {
   await marionette.send("Marionette:SetContext", { value: "content" });
   try {
     // Find the test page's tab once; Marionette stays on it afterwards.
@@ -166,6 +180,14 @@ async function rightClick(marionette, pageUrl, selector, { selectText } = {}) {
           break;
         }
       }
+    }
+    await marionette.send("WebDriver:SwitchToParentFrame");
+    if (frame) {
+      const { value: iframe } = await marionette.send("WebDriver:FindElement", {
+        using: "css selector",
+        value: frame,
+      });
+      await marionette.send("WebDriver:SwitchToFrame", { element: iframe });
     }
     await marionette.run(
       `getSelection().removeAllRanges();
@@ -196,6 +218,7 @@ async function rightClick(marionette, pageUrl, selector, { selectText } = {}) {
       ],
     });
     await marionette.send("WebDriver:ReleaseActions");
+    if (frame) await marionette.send("WebDriver:SwitchToParentFrame");
   } finally {
     await marionette.send("Marionette:SetContext", { value: "chrome" });
   }
@@ -205,7 +228,7 @@ async function rightClick(marionette, pageUrl, selector, { selectText } = {}) {
  * @param {import("./marionette.mjs").Marionette} marionette
  * @param {string} pageUrl
  * @param {string} selector
- * @param {{ selectText?: boolean }} [options]
+ * @param {{ selectText?: boolean, frame?: string }} [options]
  */
 async function contentMenu(marionette, pageUrl, selector, options) {
   await rightClick(marionette, pageUrl, selector, options);
@@ -274,4 +297,5 @@ export const SCENARIOS = {
   "selected text": (m, url) =>
     contentMenu(m, url, "#paragraph", { selectText: true }),
   page: (m, url) => contentMenu(m, url, "#empty"),
+  frame: (m, url) => contentMenu(m, url, "#inside", { frame: "#frame" }),
 };

@@ -103,7 +103,8 @@ store version, so people switching to this fork keep their settings.
   or one at the top or bottom. When hiding the last item of a group, hide its
   separator too, but only if nothing else relies on it: `#frame-sep` is also
   the separator above the Inspect items when there's no frame, which is why
-  the frame and inspect options only hide it depending on `#frame[hidden]`.
+  the frame option hides the separator after "This Frame" instead, and the
+  search option only hides `#frame-sep` when there's no frame.
 - **Firefox never sets `disabled="false"`.** It adds or removes the
   attribute (`nsContextMenu.setItemAttr`). Test `[disabled]` /
   `:not([disabled])`, as the "Copy Clean Link" option does; upstream's

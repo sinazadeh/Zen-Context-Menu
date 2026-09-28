@@ -399,11 +399,13 @@
   }
 }
 
-/* Hide the "This Frame" submenu. Its separator also separates the Inspect
- * items when there's no frame, so it's only hidden along with the submenu. */
+/* Hide the "This Frame" submenu. When it's shown, Firefox always shows the
+ * separator right after it, so that one goes too. The one before it
+ * (#frame-sep) also separates the Inspect items when there's no frame, so
+ * it stays. */
 @media -moz-pref("uc.hidecontext.frame") {
   #frame,
-  #frame-sep:has(+ #frame:not([hidden])) {
+  #frame:not([hidden]) + menuseparator {
     display: none !important;
   }
 }
@@ -451,7 +453,9 @@
 /* Hide "Change Label" and "Change Icon" */
 @media -moz-pref("uc.hidecontext.tabappearance") {
   #context_zen-edit-tab-title,
-  #context_zen-edit-tab-icon {
+  #context_zen-edit-tab-icon,
+  /* Zen puts them between two separators of their own */
+  #context_zen-edit-tab-icon + menuseparator {
     display: none !important;
   }
 }
