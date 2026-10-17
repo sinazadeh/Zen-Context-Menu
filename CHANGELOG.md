@@ -8,6 +8,52 @@ published as a GitHub release with its notes below (see
 
 ## [Unreleased]
 
+## [5.2.0] - 2026-10-17
+
+### Added
+
+- **Icon style**: Zen's icons, **Fluent** or **ZenUI** for "Icons for every
+  option" and the quick actions, picked on the settings page (with a few
+  icons of each) or in Sine's options. Fluent and ZenUI are from
+  [Context Menu Icons](https://github.com/Starry-AXQG/Context-Menu-Icons) by
+  Starry-AXQG (MIT License), and take the menu's text color like Zen's.
+- **Quick actions in the tab menu**: Reload, Pin, Add to Essentials and
+  Bookmark as a row of buttons at the top, with their names as tooltips.
+- **More options**: point at an item on the settings page and click
+  **More** to move it into a "More options" submenu at the end of its menu,
+  instead of hiding it. The preview shows it there, backups include it, and
+  holding Shift while right-clicking a tab, the sidebar or a toolbar shows the
+  whole menu.
+- **Hide unavailable options**: hides the options Zen shows greyed out, like
+  Paste with nothing copied.
+- **Gray extension icons** and **Faint separators**.
+- Icons for more items with "Icons for every option": split view (Add Split
+  View, Separate, Reverse), tab notes, Close Tabs Above/Below and Close
+  Other Tabs, Move to Start/End, Zen's folder and space menus (rename, change
+  icon, unload, new subfolder, unpack, convert to space, share, manage
+  spaces), frames, PDF editing, Copy Email/Phone, Copy Text From Image,
+  saved passwords, dictionaries, playback speed, Link Preview and more.
+
+### Changed
+
+- Options that are alternatives are one choice each on the settings page:
+  **Icons** (Zen's, every option or none), **Separators** (lines, faint or
+  none) and **Menu color** (theme's, space gradient or space color).
+  Switching one on in Sine's options switches its alternative off. Before,
+  "Icons for every option" and "No icons" could both be on, which hid the
+  icons but kept the restored icons' spacing, and the space gradient and
+  color mixed; if you had both on, you keep what you saw: no icons, and the
+  space color.
+
+### Fixed
+
+- "Icons for every option" lines icons and labels up in one column whatever
+  padding Zen, the platform or a theme gives menu items (some themes left
+  room for a missing icon, which pushed the icons inward), and draws icons
+  in the color of the menu's labels at full strength, so they no longer
+  come out black or faint on themes that only color the labels.
+- The PDF viewer's **Copy** had the Copy Link icon.
+
 ## [5.1.1] - 2026-10-17
 
 ### Changed

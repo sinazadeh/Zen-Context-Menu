@@ -13,28 +13,8 @@
     "defaultValue": true
   },
   {
-    "property": "uc.hidecontext.separators",
-    "label": "〰️ Hide all separators",
-    "type": "checkbox"
-  },
-  {
-    "property": "uc.fixcontext.restoreicons",
-    "label": "🔣 Restore icons for context menu options",
-    "type": "checkbox"
-  },
-  {
-    "property": "uc.hidecontext.icons",
-    "label": "🔣 Hide icons in context menus (extensions, containers...), except checkboxes and radio buttons",
-    "type": "checkbox"
-  },
-  {
-    "property": "uc.fixcontext.applyzengradient",
-    "label": "🎨 Apply your space's gradient to menus and panels",
-    "type": "checkbox"
-  },
-  {
-    "property": "uc.fixcontext.applyzenaccent",
-    "label": "🎨 Apply your space's accent color (the main color of its gradient) to menus and panels",
+    "property": "uc.fixcontext.tabactions",
+    "label": "⚡ Quick actions: Reload, Pin, Essentials and Bookmark as a row of buttons at the top of the tab context menu",
     "type": "checkbox"
   },
   {
@@ -42,5 +22,66 @@
     "label": "🔗 Prioritize 'Copy Clean Link' when possible (enabled by default)",
     "type": "checkbox",
     "defaultValue": true
+  },
+  {
+    "property": "uc.hidecontext.disabled",
+    "label": "✂️ Hide unavailable options (the ones shown greyed out, like Paste with nothing copied)",
+    "type": "checkbox"
+  },
+  {
+    "property": "uc.fixcontext.restoreicons",
+    "label": "🔣 Restore icons for context menu options (turns off hiding icons)",
+    "type": "checkbox"
+  },
+  {
+    "property": "uc.hidecontext.icons",
+    "label": "🔣 Hide icons in context menus (extensions, containers...), except checkboxes and radio buttons (turns off restoring icons)",
+    "type": "checkbox"
+  },
+  {
+    "property": "uc.fixcontext.iconpack",
+    "label": "🎨 Icon style for restored icons and the quick actions: Zen's, or Fluent or ZenUI from Context Menu Icons by Starry-AXQG",
+    "type": "dropdown",
+    "defaultValue": "zen",
+    "placeholder": false,
+    "options": [
+      {
+        "label": "Zen",
+        "value": "zen"
+      },
+      {
+        "label": "Fluent",
+        "value": "fluent"
+      },
+      {
+        "label": "ZenUI",
+        "value": "zenui"
+      }
+    ]
+  },
+  {
+    "property": "uc.fixcontext.grayscaleicons",
+    "label": "🩶 Gray extension icons in context menus (in color again under the pointer)",
+    "type": "checkbox"
+  },
+  {
+    "property": "uc.hidecontext.separators",
+    "label": "〰️ Hide all separators (turns off faint separators)",
+    "type": "checkbox"
+  },
+  {
+    "property": "uc.fixcontext.faintseparators",
+    "label": "〰️ Faint separators: draw the lines between groups of options at half strength (turns off hiding them)",
+    "type": "checkbox"
+  },
+  {
+    "property": "uc.fixcontext.applyzengradient",
+    "label": "🎨 Apply your space's gradient to menus and panels (turns off its accent color)",
+    "type": "checkbox"
+  },
+  {
+    "property": "uc.fixcontext.applyzenaccent",
+    "label": "🎨 Apply your space's accent color (the main color of its gradient) to menus and panels (turns off its gradient)",
+    "type": "checkbox"
   }
 ]

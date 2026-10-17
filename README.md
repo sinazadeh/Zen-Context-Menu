@@ -11,7 +11,7 @@
 >
 > See the [changelog](CHANGELOG.md) for details.
 
-Declutter your right click menus: switch off any option you never use, from a settings page that lists every item of every menu, including the ones Zen, your other mods and your extensions add. It can also reorder the tab context menu, bring back icons or give menus your space's colors.
+Declutter your right click menus: switch off any option you never use, or tuck it away in a **More options** submenu, from a settings page that lists every item of every menu, including the ones Zen, your other mods and your extensions add. It can also reorder the tab context menu, put its most used actions in a row of buttons, bring back icons (Zen's, Fluent or ZenUI) or give menus your space's colors.
 
 ![Settings page](previews/settings.png)
 
@@ -22,13 +22,17 @@ Declutter your right click menus: switch off any option you never use, from a se
 - **Preview.** Each menu is shown as it looked the last time you opened it, without the items you hide. The page menu keeps one for each kind of thing you right-clicked: a page, a link, an image, selected text...
 - **No stray separators.** When you hide every item between two separators, one of them goes too, so a menu never shows two lines in a row or one at its top or bottom. This also tidies up after other mods that show or hide their items late.
 - **One switch per option.** "Pin Tab" also covers "Unpin Tab" and "Pin Tabs", "Mute" covers "Unmute", and so on.
+- **More options.** Options you rarely use but don't want to lose can go into a **More options** submenu at the end of their menu instead of being hidden: point at an item on the settings page and click **More**. Hold <kbd>Shift</kbd> while you right-click a tab, the sidebar or a toolbar to see the whole menu.
 - **Style options:**
   - Reorder the tab context menu: tab actions first (split view, mute, Essentials, pin, unload, duplicate), then moving and organizing (folders, other spaces, containers), then everything else, then closing _(on by default)_
+  - Quick actions: Reload, Pin, Add to Essentials and Bookmark as a row of buttons at the top of the tab context menu, with their names as tooltips
   - Show "Copy Clean Link" instead of "Copy Link" when it would remove tracking parameters, and only "Copy Link" when there's nothing to remove _(on by default)_
-  - Restore icons for context menu options, like Zen had them before 1.12.9b
-  - Hide the icons in context menus (extension items, containers...), except checkboxes and radio buttons
-  - Hide all separators
-  - Apply your space's gradient or accent color to menus, tab previews and other small pop-ups
+  - Hide unavailable options: the ones Zen shows greyed out, like Paste with nothing copied or Undo with nothing to undo
+  - Icons: the ones Zen shows (extensions, containers...), one for **every option** like Zen had them before 1.12.9b, or **none** but checkmarks. Restored icons line up in one column whatever padding your theme gives menu items, and are drawn in the color of the menu's text (so they show on dark themes that only color the labels)
+  - An icon style for restored icons and the quick actions: Zen's own, **Fluent** or **ZenUI**, both from [Context Menu Icons](https://github.com/Starry-AXQG/Context-Menu-Icons)
+  - Draw extensions' icons in grays
+  - Separators: lines, **faint** lines, or **none**
+  - Menu color: your theme's, your space's **gradient**, or its **accent color**, for menus, tab previews and other small pop-ups
 
 Coming from version 4 or the theme store version? The "Hide ..." options you had on become hidden items the first time version 5 runs, so your menus stay the way they were.
 
@@ -77,19 +81,24 @@ A few things to know:
 - Extensions' items, and a few of Zen's, only exist while their menu is open. Open the menu once and they're listed.
 - Items Zen hasn't shown yet are greyed out; in the tab menu they're under **Only in some situations** (pinned tabs, several selected tabs, or Firefox features Zen doesn't use).
 - **Customize Context Menus…** is a menu item like any other, so you can hide it too; Sine's gear button still opens the page.
-- **Backup** saves the items you've hidden and your **Appearance** settings to a file (**Export settings…**), and puts them back from one (**Import settings…**), for instance in another profile or after reinstalling. Importing replaces your current choices, after asking. The macOS switch isn't included, since it's Zen's own setting.
-- The hidden items are saved in `uc.hidecontext.items` (a list in `about:config`), and the style options as `uc.hidecontext.*` and `uc.fixcontext.*` switches. What the menus showed, for the list and the preview, is kept in `zen-context-menu.json` in your profile folder.
+- **More** next to an item (shown when you point at it) moves it into **More options** at the end of its menu; click **In More options** to put it back. The preview shows where it went. Holding <kbd>Shift</kbd> while right-clicking shows the whole menu, for the menus Zen's own interface opens (tabs, sidebar, toolbars, bookmarks); a page's menu is opened by the page's process, which doesn't tell.
+- **Icons**, **Separators** and **Menu color** are one choice each: in Sine's options and `about:config` they're separate switches (shared with the theme store version), and switching one on switches its alternative off. With `chrome.css` alone, hiding icons or separators wins over restoring or fading them, and the accent color over the gradient.
+- **Icon style** picks Zen's icons, Fluent or ZenUI for restored icons and the quick actions; the list shows the picked style's icons. It's dimmed while neither is on, and so is **Gray extension icons** with no icons.
+- **Backup** saves the items you've hidden or moved to **More options** and your **Appearance** settings to a file (**Export settings…**), and puts them back from one (**Import settings…**), for instance in another profile or after reinstalling. Importing replaces your current choices, after asking. The macOS switch isn't included, since it's Zen's own setting.
+- The hidden items are saved in `uc.hidecontext.items` and the ones in **More options** in `uc.hidecontext.folded` (lists in `about:config`), the style options as `uc.hidecontext.*` and `uc.fixcontext.*` switches, and the icon style in `uc.fixcontext.iconpack` (`zen`, `fluent` or `zenui`). What the menus showed, for the list and the preview, is kept in `zen-context-menu.json` in your profile folder.
 
 If an item can't be hidden or an option stops doing anything after a Zen update, please [open an issue](https://github.com/sinazadeh/zen-calmer-context-menu/issues) with your Zen version (`about:support`) and the item or option's name.
 
 ## Development
 
-There's no build step. `context-menu.uc.js` hides items as menus open and records what they show; `context-menu/` holds the settings page and the code it shares with the script; `chrome.css` holds the style options, `preferences.json` lists them and `theme.json` is the manifest Sine reads. Every week, CI checks that everything `chrome.css` points at still exists in the latest Zen and opens the real menus in it with each option on and with items hidden. See [CONTRIBUTING.md](CONTRIBUTING.md) for the checks to run and [AGENTS.md](AGENTS.md) for how the mod is put together and how to keep it working when Zen changes.
+There's no build step for the mod itself. `context-menu.uc.js` hides items as menus open, moves them into the quick actions and **More options**, and records what menus show; `context-menu/` holds the settings page and the code it shares with the script, and `context-menu/icons/` the Fluent and ZenUI icon styles (their style sheets are generated from `chrome.css` and `packs.json` by `node scripts/build_icon_packs.mjs`); `chrome.css` holds the style options, `preferences.json` lists them and `theme.json` is the manifest Sine reads. Every week, CI checks that everything `chrome.css` points at still exists in the latest Zen and opens the real menus in it with each option on and with items hidden. See [CONTRIBUTING.md](CONTRIBUTING.md) for the checks to run and [AGENTS.md](AGENTS.md) for how the mod is put together and how to keep it working when Zen changes.
 
 ## Credits and license
 
 Zen Context Menu was created by [KiKaraage](https://github.com/KiKaraage) ([KiKaraage/ZenMods](https://github.com/KiKaraage/ZenMods)). This fork, Zen Calmer Context Menu, is maintained by [sinazadeh](https://github.com/sinazadeh). Both are released under the [MIT License](LICENSE).
 
 The settings page's format (cards with switches and a live preview, opened from the mod's gear button) follows the one [oom333/zen-tab-groups](https://github.com/oom333/zen-tab-groups) made for Tab Groups.
+
+The **Fluent** and **ZenUI** icon styles, and the ideas for the quick actions, **More options**, hiding unavailable options, gray extension icons and faint separators, come from [Context Menu Icons](https://github.com/Starry-AXQG/Context-Menu-Icons) by [Starry-AXQG](https://github.com/Starry-AXQG), released under the MIT License; its icons and license are in [`context-menu/icons`](context-menu/icons). Thank you!
 
 [shanx/ZenMods](https://github.com/shanx/ZenMods) is another community fork of the mod, if you'd like to compare.

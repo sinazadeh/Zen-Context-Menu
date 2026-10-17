@@ -6,7 +6,10 @@ Thanks for helping keep Zen Calmer Context Menu working.
 
 - `context-menu.uc.js` hides the items chosen on the settings page
   (`context-menu/`); `chrome.css` holds the style options, listed in
-  `preferences.json`. There's no build step.
+  `preferences.json`. There's no build step, except for the icon styles'
+  style sheets: after changing `chrome.css`'s icons or
+  `context-menu/icons/packs.json`, run `node scripts/build_icon_packs.mjs`
+  (the tests fail until you do).
 - `theme.json` is the manifest [Sine](https://github.com/CosmoCreeper/Sine)
   reads when installing from this repository.
 - The repository intentionally does not track a `package.json` or lockfile.

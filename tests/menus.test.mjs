@@ -332,3 +332,92 @@ test("anything but a backup this version can read is refused", () => {
     assert.throws(() => Z.parseBackup(text, []), message, text.slice(0, 60));
   }
 });
+
+test("a backup keeps the folded items and the icon style", () => {
+  const text = Z.makeBackup(
+    ["#context_reloadTab"],
+    { "uc.fixcontext.iconpack": "fluent", "uc.hidecontext.icons": true },
+    new Date("2026-10-17T12:00:00Z"),
+    ["#context-savepage", "#context_unpinTab"],
+  );
+  assert.deepEqual(JSON.parse(text).folded, [
+    "#context-savepage",
+    "#context_unpinTab",
+  ]);
+  const choices = { "uc.fixcontext.iconpack": ["zen", "fluent", "zenui"] };
+  const backup = Z.parseBackup(text, ["uc.hidecontext.icons"], choices);
+  // Aliases become the item whose switch they follow.
+  assert.deepEqual([...backup.folded].sort(), [
+    "#context-savepage",
+    "#context_pinTab",
+  ]);
+  assert.deepEqual(Object.fromEntries(backup.options), {
+    "uc.fixcontext.iconpack": "fluent",
+    "uc.hidecontext.icons": true,
+  });
+
+  // Only a value from the list, and backups from before folding fold nothing.
+  const old = Z.parseBackup(
+    JSON.stringify({
+      format: "calmer-context-menu-backup",
+      version: 1,
+      hidden: [],
+      options: { "uc.fixcontext.iconpack": "../../evil" },
+    }),
+    [],
+    choices,
+  );
+  assert.equal(old.folded.size, 0);
+  assert.equal(old.options.size, 0);
+  assert.throws(
+    () =>
+      Z.parseBackup(
+        JSON.stringify({
+          format: "calmer-context-menu-backup",
+          version: 1,
+          hidden: [],
+          folded: "#context_pinTab",
+        }),
+        [],
+      ),
+    /folded items is damaged/,
+  );
+});
+
+test("alternative options: the first of a group that's on wins", () => {
+  const on =
+    (...prefs) =>
+    (pref) =>
+      prefs.includes(pref);
+  assert.deepEqual(plain(Z.conflictingOptions(on())), []);
+  assert.deepEqual(
+    plain(
+      Z.conflictingOptions(
+        on(
+          "uc.fixcontext.restoreicons",
+          "uc.hidecontext.icons",
+          "uc.fixcontext.faintseparators",
+        ),
+      ),
+    ),
+    ["uc.fixcontext.restoreicons"],
+  );
+  for (const group of Z.EXCLUSIVE_OPTIONS) {
+    for (const pref of group) {
+      const option = preferences.find((p) => p.property === pref);
+      assert.equal(option?.type, "checkbox", pref);
+      // One that's on by default would switch the others off on its own.
+      assert.ok(!Z.DEFAULT_ON.includes(pref), pref);
+    }
+  }
+});
+
+test("the settings page shows each group of alternatives as one choice", async () => {
+  const settings = await read("context-menu/settings.js");
+  for (const group of Z.EXCLUSIVE_OPTIONS) {
+    const at = group.map((pref) => settings.indexOf(`pref: "${pref}"`));
+    assert.ok(Math.min(...at) >= 0, group.join(", "));
+    const between = settings.slice(Math.min(...at), Math.max(...at));
+    assert.doesNotMatch(between, /\btitle:/, `${group.join(", ")} are apart`);
+  }
+});

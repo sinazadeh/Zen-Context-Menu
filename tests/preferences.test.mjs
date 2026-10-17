@@ -7,6 +7,12 @@ import { extractPrefs } from "../scripts/css_targets.mjs";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const preferences = JSON.parse(await read("preferences.json"));
 const css = await read("chrome.css");
+// The icon styles' style sheets (scripts/build_icon_packs.mjs).
+const packSheets = await Promise.all(
+  Object.keys(JSON.parse(await read("context-menu/icons/packs.json"))).map(
+    (id) => read(`context-menu/icons/${id}.css`),
+  ),
+);
 
 // Firefox's own preferences the mod exposes; everything else is the mod's.
 const BROWSER_PREFS = new Set(["widget.macos.native-context-menus"]);
@@ -66,12 +72,33 @@ test("preference properties are unique", () => {
 });
 
 test("every option in preferences.json is used by chrome.css", () => {
-  // An option that isn't used shows a checkbox that does nothing.
-  const used = extractPrefs(css);
+  // An option that isn't used shows a checkbox that does nothing. The icon
+  // style is used by the icon styles' style sheets.
+  const used = new Set(
+    [css, ...packSheets].flatMap((sheet) => [...extractPrefs(sheet)]),
+  );
   for (const { property } of preferences) {
     if (!BROWSER_PREFS.has(property)) {
       assert.ok(used.has(property), `${property} is not used by chrome.css`);
     }
+  }
+});
+
+test("dropdowns offer values of their preference's type", () => {
+  for (const pref of preferences.filter((p) => p.type === "dropdown")) {
+    assert.ok(pref.options.length > 1, `${pref.property}: options`);
+    for (const option of pref.options) {
+      assert.equal(typeof option.label, "string", `${pref.property}: label`);
+      assert.equal(
+        typeof option.value,
+        typeof pref.defaultValue,
+        `${pref.property}: ${option.label}`,
+      );
+    }
+    assert.ok(
+      pref.options.some((option) => option.value === pref.defaultValue),
+      `${pref.property}: the default isn't one of the options`,
+    );
   }
 });
 

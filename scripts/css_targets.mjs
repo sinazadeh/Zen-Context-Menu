@@ -20,7 +20,8 @@ export function stripComments(css) {
 }
 
 /**
- * Preferences used in `@media -moz-pref("...")` queries.
+ * Preferences used in `@media -moz-pref("...")` queries, including ones
+ * comparing a value (`-moz-pref("...", "value")`).
  *
  * @param {string} css
  * @returns {Set<string>}
@@ -28,7 +29,7 @@ export function stripComments(css) {
 export function extractPrefs(css) {
   const prefs = new Set();
   for (const [, pref] of stripComments(css).matchAll(
-    /-moz-pref\(\s*["']([^"']+)["']\s*\)/g,
+    /-moz-pref\(\s*["']([^"']+)["']\s*(?:,\s*["'][^"']*["']\s*)?\)/g,
   )) {
     prefs.add(pref);
   }

@@ -181,7 +181,10 @@ async function main() {
   const preferences = JSON.parse(
     await readFile(new URL("preferences.json", ROOT), "utf8"),
   );
+  // The on/off options (the icon style is a dropdown, whose icons the unit
+  // tests check).
   const options = preferences
+    .filter(({ type }) => type === "checkbox")
     .map(({ property }) => property)
     .filter((property) => property.startsWith("uc."));
   const defaults = Object.fromEntries(
@@ -302,6 +305,8 @@ async function main() {
     // Each option, alone and with the defaults.
     for (const option of hideOptions) {
       const targets = extractSelectorTargets(blocks.get(option) ?? "").ids;
+      // "Hide unavailable options" hides whatever Zen shows greyed out.
+      const hidesDisabled = option === "uc.hidecontext.disabled";
       const alone = await check(option, { [option]: true });
       // Appearance options (icons, separators) don't hide items.
       if (!appearanceOptions.has(option)) {
@@ -313,11 +318,16 @@ async function main() {
           if (!entries) continue;
           const before = itemsOf(none.get(menu));
           const after = itemsOf(entries);
+          const disabled = itemsOf(
+            (none.get(menu) ?? []).filter((e) => e.disabled),
+          );
+          const targeted = (item) =>
+            targets.has(item) || (hidesDisabled && disabled.has(item));
           for (const item of before) {
-            if (targets.has(item)) hasTargets = true;
+            if (targeted(item)) hasTargets = true;
             if (after.has(item)) continue;
             hidSomething = true;
-            if (!targets.has(item)) fail(option, menu, `also hides ${item}`);
+            if (!targeted(item)) fail(option, menu, `also hides ${item}`);
           }
           for (const item of after) {
             if (!before.has(item)) fail(option, menu, `makes ${item} appear`);

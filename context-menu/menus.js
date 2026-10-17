@@ -416,6 +416,45 @@ var ZenContextMenuShared = (() => {
     "uc.hidecontext.copylink",
   ];
 
+  /**
+   * Styles of icons for the "Icons for every option" option, the
+   * preference's values. chrome.css draws Zen's; the others are style sheets
+   * in context-menu/icons (scripts/build_icon_packs.mjs), with icons from
+   * Context Menu Icons by Starry-AXQG.
+   */
+  const ICON_PACKS = [
+    { id: "zen", name: "Zen" },
+    { id: "fluent", name: "Fluent" },
+    { id: "zenui", name: "ZenUI" },
+  ];
+  const PREF_ICON_PACK = "uc.fixcontext.iconpack";
+
+  /**
+   * Options that are alternatives to each other: different looks for the
+   * same thing, so at most one of each group is on. They stay separate
+   * preferences (the names are shared with the theme store version), the
+   * settings page shows each group as one choice, and the script switches
+   * the others of a group off when one is switched on. When more than one is
+   * on anyway (chrome.css without the script, an old backup), the first
+   * wins: chrome.css only applies the others while it's off.
+   */
+  const EXCLUSIVE_OPTIONS = [
+    ["uc.hidecontext.icons", "uc.fixcontext.restoreicons"],
+    ["uc.hidecontext.separators", "uc.fixcontext.faintseparators"],
+    ["uc.fixcontext.applyzenaccent", "uc.fixcontext.applyzengradient"],
+  ];
+
+  /**
+   * The options to switch off so that at most one of each EXCLUSIVE_OPTIONS
+   * group is on, the first one winning.
+   *
+   * @param {(pref: string) => boolean} isOn whether an option is on
+   * @returns {Array<string>}
+   */
+  function conflictingOptions(isOn) {
+    return EXCLUSIVE_OPTIONS.flatMap((group) => group.filter(isOn).slice(1));
+  }
+
   /** Firefox's id for an extension's menu items (ext-menus.js). */
   const widgetId = (extensionId) =>
     String(extensionId)
@@ -642,8 +681,10 @@ var ZenContextMenuShared = (() => {
   /** The value saved for a set of hidden items. */
   const serializeHidden = (keys) => JSON.stringify([...keys].sort());
 
-  // A backup file (the settings page's Backup card): the hidden items and the
-  // style options. `format` tells it apart from other JSON files; raise
+  // A backup file (the settings page's Backup card): the hidden and folded
+  // items and the style options. `format` tells it apart from other JSON
+  // files; fields added later (`folded`) are ignored by versions before
+  // them and missing from backups made before them. Raise
   // BACKUP_VERSION only when the shape changes in a way older versions would
   // misread, since they refuse newer backups.
   const BACKUP_FORMAT = "calmer-context-menu-backup";
@@ -657,16 +698,19 @@ var ZenContextMenuShared = (() => {
    * The contents of a backup file.
    *
    * @param {Iterable<string>} hiddenKeys
-   * @param {Object<string, boolean>} options the style options, by preference
+   * @param {Object<string, boolean | string>} options the style options, by
+   *   preference
    * @param {Date} [date] when it was made
+   * @param {Iterable<string>} [foldedKeys] items in "More options"
    * @returns {string}
    */
-  function makeBackup(hiddenKeys, options, date = new Date()) {
+  function makeBackup(hiddenKeys, options, date = new Date(), foldedKeys = []) {
     const backup = {
       format: BACKUP_FORMAT,
       version: BACKUP_VERSION,
       exportedAt: date.toISOString(),
       hidden: [...hiddenKeys].sort(),
+      folded: [...foldedKeys].sort(),
       options: Object.fromEntries(Object.entries(options).sort()),
     };
     return `${JSON.stringify(backup, null, 2)}\n`;
@@ -674,15 +718,18 @@ var ZenContextMenuShared = (() => {
 
   /**
    * Reads a backup file. It can come from anywhere, so only what's expected
-   * is taken: item keys that are strings, and true or false for the style
-   * options in `optionPrefs`; everything else is ignored.
+   * is taken: item keys that are strings, true or false for the style
+   * options in `optionPrefs`, and one of its values for those in `choices`;
+   * everything else is ignored.
    *
    * @param {string} text the file's contents
-   * @param {Array<string>} optionPrefs the preferences a backup may set
-   * @returns {{hidden: Set<string>, options: Map<string, boolean>}}
+   * @param {Array<string>} optionPrefs the on/off preferences a backup may set
+   * @param {Object<string, Array<string>>} [choices] the preferences with a
+   *   value from a list a backup may set, and their values
+   * @returns {{hidden: Set<string>, folded: Set<string>, options: Map<string, boolean | string>}}
    * @throws {Error} saying why, for the user, if it can't be restored
    */
-  function parseBackup(text, optionPrefs) {
+  function parseBackup(text, optionPrefs, choices = {}) {
     if (typeof text !== "string" || text.length > BACKUP_MAX_LENGTH) {
       throw new Error("This file is too big to be a backup.");
     }
@@ -708,19 +755,26 @@ var ZenContextMenuShared = (() => {
         "This backup was made by a newer version of the mod. Update the mod to restore it.",
       );
     }
-    if (!Array.isArray(data.hidden) || data.hidden.length > BACKUP_MAX_ITEMS) {
-      throw new Error("This backup's list of hidden items is damaged.");
-    }
-    const hidden = new Set(
-      data.hidden
-        .filter(
-          (key) =>
-            typeof key === "string" &&
-            key.length > 0 &&
-            key.length <= BACKUP_MAX_KEY_LENGTH,
-        )
-        .map(canonicalKey),
-    );
+    const keys = (list, what) => {
+      if (!Array.isArray(list) || list.length > BACKUP_MAX_ITEMS) {
+        throw new Error(`This backup's list of ${what} items is damaged.`);
+      }
+      return new Set(
+        list
+          .filter(
+            (key) =>
+              typeof key === "string" &&
+              key.length > 0 &&
+              key.length <= BACKUP_MAX_KEY_LENGTH,
+          )
+          .map(canonicalKey),
+      );
+    };
+    const hidden = keys(data.hidden, "hidden");
+    // Made before items could be folded: none were.
+    const folded = Object.hasOwn(data, "folded")
+      ? keys(data.folded, "folded")
+      : new Set();
     const values =
       data.options &&
       typeof data.options === "object" &&
@@ -733,7 +787,12 @@ var ZenContextMenuShared = (() => {
         options.set(pref, values[pref]);
       }
     }
-    return { hidden, options };
+    for (const [pref, allowed] of Object.entries(choices)) {
+      if (Object.hasOwn(values, pref) && allowed.includes(values[pref])) {
+        options.set(pref, values[pref]);
+      }
+    }
+    return { hidden, folded, options };
   }
 
   return Object.freeze({
@@ -744,7 +803,12 @@ var ZenContextMenuShared = (() => {
     LEGACY_PREFS,
     SUGGESTED,
     DEFAULT_ON,
+    ICON_PACKS,
+    PREF_ICON_PACK,
+    EXCLUSIVE_OPTIONS,
+    conflictingOptions,
     PREF_HIDDEN: "uc.hidecontext.items",
+    PREF_FOLDED: "uc.hidecontext.folded",
     widgetId,
     itemKey,
     canonicalKey,
