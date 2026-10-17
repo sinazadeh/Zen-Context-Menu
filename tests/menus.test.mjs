@@ -332,3 +332,54 @@ test("anything but a backup this version can read is refused", () => {
     assert.throws(() => Z.parseBackup(text, []), message, text.slice(0, 60));
   }
 });
+
+test("a backup keeps the folded items and the icon style", () => {
+  const text = Z.makeBackup(
+    ["#context_reloadTab"],
+    { "uc.fixcontext.iconpack": "fluent", "uc.hidecontext.icons": true },
+    new Date("2026-10-17T12:00:00Z"),
+    ["#context-savepage", "#context_unpinTab"],
+  );
+  assert.deepEqual(JSON.parse(text).folded, [
+    "#context-savepage",
+    "#context_unpinTab",
+  ]);
+  const choices = { "uc.fixcontext.iconpack": ["zen", "fluent", "zenui"] };
+  const backup = Z.parseBackup(text, ["uc.hidecontext.icons"], choices);
+  // Aliases become the item whose switch they follow.
+  assert.deepEqual([...backup.folded].sort(), [
+    "#context-savepage",
+    "#context_pinTab",
+  ]);
+  assert.deepEqual(Object.fromEntries(backup.options), {
+    "uc.fixcontext.iconpack": "fluent",
+    "uc.hidecontext.icons": true,
+  });
+
+  // Only a value from the list, and backups from before folding fold nothing.
+  const old = Z.parseBackup(
+    JSON.stringify({
+      format: "calmer-context-menu-backup",
+      version: 1,
+      hidden: [],
+      options: { "uc.fixcontext.iconpack": "../../evil" },
+    }),
+    [],
+    choices,
+  );
+  assert.equal(old.folded.size, 0);
+  assert.equal(old.options.size, 0);
+  assert.throws(
+    () =>
+      Z.parseBackup(
+        JSON.stringify({
+          format: "calmer-context-menu-backup",
+          version: 1,
+          hidden: [],
+          folded: "#context_pinTab",
+        }),
+        [],
+      ),
+    /folded items is damaged/,
+  );
+});

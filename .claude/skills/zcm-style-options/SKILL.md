@@ -66,6 +66,50 @@ version. The old "Hide ..." options live on only in `LEGACY_PREFS`.
   page reads these rules too, so keep them `#id { --menu-image: url("…") }`.
 - **Only icons that ship with Zen or Firefox** (`chrome://browser/skin/zen-icons/*`,
   `chrome://browser/skin/*`, `chrome://global/skin/icons/*`): Zen deletes
-  unused ones, which is how 24 of v3.1's disappeared.
+  unused ones, which is how 24 of v3.1's disappeared. The icon styles'
+  own SVGs are the exception (below).
+- **Restored icons are laid out and colored by force**: one gutter (inset,
+  16px icon, gap) on every platform but macOS, whatever padding a theme
+  gives items or labels, and `fill: var(--calmer-icon-fill)`, which the
+  script sets per menu from the computed color of its labels, at full
+  opacity. Themes that color labels but not items otherwise get black
+  icons.
+
+## Icon styles
+
+`uc.fixcontext.iconpack` (a string: `zen`, `fluent`, `zenui`; a
+`"dropdown"` in `preferences.json` with `"placeholder": false`) picks the
+icons of "Icons for every option" and the quick actions. Zen's are
+`chrome.css`'s. Fluent and ZenUI come from Context Menu Icons by
+Starry-AXQG (MIT; keep `context-menu/icons/LICENSE` and the README credit):
+
+- `context-menu/icons/packs.json` maps each Zen icon `chrome.css` uses to
+  the pack's file, plus per-item overrides (`items`, keyed by the selector
+  as written in `chrome.css`, on one line). `<pack>/` holds only the SVGs
+  it uses, each drawn with `context-fill`.
+- `node scripts/build_icon_packs.mjs` writes `<pack>.css`: every icon rule
+  of the restoreicons block under `:root` (so it beats `chrome.css`) inside
+  `@media -moz-pref("uc.fixcontext.iconpack", "<pack>")`, with Zen's icon
+  where the pack has none. Run it after changing either file;
+  `tests/icon_packs.test.mjs` fails until you do. Prettier skips them.
+- The script loads them as `data:` user sheets with **absolute** icon
+  URLs: an `url()` inside a custom property is resolved against the sheet
+  that uses the variable (`chrome.css`), and an SVG only gets
+  `context-fill` from a `chrome://` or `resource://` address.
+- An item whose own pack icon replaces a mirrored Zen one (Redo uses Undo's)
+  gets `transform: none`.
+
+## Options the script helps
+
+- **Quick actions** (`uc.fixcontext.tabactions`): the script moves Reload,
+  Pin/Unpin, Add to/Remove from Essentials and Bookmark into
+  `#calmer-tab-actions` (a `menugroup`, like `#context-navigation`) while
+  the tab menu is open; `chrome.css` styles it and sets their icons for
+  when restoreicons is off. "No icons" must keep excluding it.
+- **Hide unavailable options** (`uc.hidecontext.disabled`) hides
+  `[disabled]` items in the menus of `MENUS` (a test keeps the list in
+  sync). The script retidies separators (its observer watches `disabled`);
+  for CSS-only installs, the rule hiding `#context-sep-redo` covers the one
+  separator `check_menus.mjs` found out of place.
 - **macOS** native menus can't be styled, hence the first option; they do
   honor `hidden`, so the item list works there either way.

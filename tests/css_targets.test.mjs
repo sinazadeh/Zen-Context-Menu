@@ -34,6 +34,10 @@ const CSS = `
 
 test("extractPrefs finds -moz-pref() queries outside comments", () => {
   assert.deepEqual([...extractPrefs(CSS)], ["uc.hidecontext.example"]);
+  assert.deepEqual(
+    [...extractPrefs('@media -moz-pref("uc.fixcontext.style", "a") {}')],
+    ["uc.fixcontext.style"],
+  );
 });
 
 test("extractChromeUrls finds quoted and unquoted chrome:// urls", () => {

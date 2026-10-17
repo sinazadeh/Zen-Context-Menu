@@ -41,13 +41,17 @@
   const isSeparator = (el) => el.localName === "menuseparator";
 
   const cleanups = [];
+  let unloaded = false;
   const log = (...args) => console.error("[Calmer Context Menu]", ...args);
 
   /* ---------- hidden items ---------- */
 
   let hidden = new Set();
+  // Items moved into "More options" (the settings page's fold buttons).
+  let folded = new Set();
   const readHidden = () => {
     hidden = Z.parseHidden(Services.prefs.getStringPref(Z.PREF_HIDDEN, "[]"));
+    folded = Z.parseHidden(Services.prefs.getStringPref(Z.PREF_FOLDED, "[]"));
   };
   const writeHidden = (keys) =>
     Services.prefs.setStringPref(Z.PREF_HIDDEN, Z.serializeHidden(keys));
@@ -204,8 +208,12 @@
           record.target.parentElement === popup
         ) {
           changed = true;
-          // Someone else showed or hid it: it's theirs again.
-          state.hid.delete(record.target);
+          // Someone else showed or hid it: it's theirs again. (An item that
+          // was enabled or disabled may show or hide with "Hide unavailable
+          // options", which needs the separators tidied again.)
+          if (record.attributeName === "hidden") {
+            state.hid.delete(record.target);
+          }
         }
       }
       // Don't fight a script that insists on showing an item.
@@ -217,7 +225,7 @@
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ["hidden"],
+      attributeFilter: ["hidden", "disabled"],
     });
     states.set(popup, state);
     return state;
@@ -235,6 +243,256 @@
     states.delete(popup);
   }
 
+  /* ---------- quick actions and "More options" ---------- */
+
+  // For each open menu this script rearranged: the order it had before (for
+  // record()), the items it moved and where from, and the elements it added.
+  // Everything goes back when the menu closes, so Firefox, Zen and other
+  // mods find their items where they left them.
+  const layouts = new Map();
+
+  const ownElement = (el) => /^calmer-/.test(el?.id ?? "");
+
+  function rearrange(popup, root) {
+    unarrange(popup);
+    const layout = {
+      order: inShownOrder(popup),
+      moved: [],
+      added: [],
+      tooltips: [],
+    };
+    layouts.set(popup, layout);
+    if (
+      root.id === "tabContextMenu" &&
+      Services.prefs.getBoolPref("uc.fixcontext.tabactions", false)
+    ) {
+      addTabActions(popup, layout);
+    }
+    // Shift applies to the menu the right-click opens, and only to it.
+    const whole = showWholeMenu;
+    showWholeMenu = false;
+    if (!whole) {
+      foldItems(popup, root, layout);
+    }
+  }
+
+  function moveItem(el, into, layout) {
+    layout.moved.push({ el, parent: el.parentElement, next: el.nextSibling });
+    into.append(el);
+  }
+
+  function unarrange(popup) {
+    const layout = layouts.get(popup);
+    if (!layout) {
+      return;
+    }
+    layouts.delete(popup);
+    for (const el of layout.tooltips) {
+      el.removeAttribute("tooltip");
+    }
+    for (const { el, parent, next } of layout.moved.reverse()) {
+      parent.insertBefore(el, next?.parentNode === parent ? next : null);
+    }
+    for (const el of layout.added) {
+      el.remove();
+    }
+  }
+
+  // The tab menu's quick actions, in this order (the options of one tab,
+  // then of several selected tabs, whichever Firefox shows).
+  const TAB_ACTIONS = [
+    "context_reloadTab",
+    "context_reloadSelectedTabs",
+    "context_pinTab",
+    "context_unpinTab",
+    "context_pinSelectedTabs",
+    "context_unpinSelectedTabs",
+    "context_zen-add-essential",
+    "context_zen-remove-essential",
+    "context_bookmarkTab",
+    "context_bookmarkSelectedTabs",
+  ];
+
+  function addTabActions(popup, layout) {
+    const items = TAB_ACTIONS.map((id) => document.getElementById(id)).filter(
+      (el) => el?.parentElement === popup && shown(el),
+    );
+    if (items.length < 2) {
+      return;
+    }
+    const group = document.createXULElement("menugroup");
+    group.id = "calmer-tab-actions";
+    const separator = document.createXULElement("menuseparator");
+    separator.id = "calmer-tab-actions-separator";
+    popup.prepend(group, separator);
+    layout.added.push(group, separator);
+    for (const el of items) {
+      moveItem(el, group, layout);
+      // Their labels are hidden: shown as tooltips instead.
+      if (!el.hasAttribute("tooltip")) {
+        el.setAttribute("tooltip", tooltip().id);
+        layout.tooltips.push(el);
+      }
+    }
+  }
+
+  // Shows a quick action's label (filled in by Fluent once the menu opens).
+  function tooltip() {
+    let tip = document.getElementById("calmer-tab-actions-tooltip");
+    if (!tip) {
+      tip = document.createXULElement("tooltip");
+      tip.id = "calmer-tab-actions-tooltip";
+      tip.addEventListener("popupshowing", (event) => {
+        const label = tip.triggerNode?.closest("menuitem, menu")?.label;
+        if (label) {
+          tip.setAttribute("label", label);
+        } else {
+          event.preventDefault();
+        }
+      });
+      document.getElementById("mainPopupSet").append(tip);
+      cleanups.push(() => tip.remove());
+    }
+    return tip;
+  }
+
+  // Shift held while right-clicking shows the whole menu, folded items in
+  // their places. Only menus Zen's own interface opens (tabs, sidebar,
+  // toolbars...) can tell: the page menu is opened from the page's process,
+  // which doesn't say.
+  let showWholeMenu = false;
+  const onContextMenu = (event) => {
+    showWholeMenu = event.shiftKey;
+  };
+
+  // "More options" in the languages Context Menu Icons translates its fold
+  // menu to; English otherwise.
+  const MORE_LABELS = {
+    "zh-CN": "更多选项",
+    "zh-TW": "更多選項",
+    ja: "その他のオプション",
+    es: "Más opciones",
+    de: "Weitere Optionen",
+    fr: "Plus d’options",
+  };
+  function moreLabel() {
+    const locale = Services.locale.appLocaleAsBCP47;
+    return (
+      MORE_LABELS[locale] ?? MORE_LABELS[locale.split("-")[0]] ?? "More options"
+    );
+  }
+
+  // Folded items that are showing go into a "More options" submenu at the
+  // end of the menu (after the reorder option's last group).
+  function foldItems(popup, root, layout) {
+    if (!folded.size) {
+      return;
+    }
+    const items = [...popup.children].filter((el) => {
+      const key = isItem(el) && !ownElement(el) && keyOf(el, root);
+      return key && folded.has(Z.canonicalKey(key)) && shown(el);
+    });
+    if (!items.length) {
+      return;
+    }
+    const separator = document.createXULElement("menuseparator");
+    separator.id = "calmer-more-options-separator";
+    const more = document.createXULElement("menu");
+    more.id = "calmer-more-options";
+    more.setAttribute("label", moreLabel());
+    const morePopup = document.createXULElement("menupopup");
+    morePopup.id = "calmer-more-options-popup";
+    more.append(morePopup);
+    for (const el of [separator, more]) {
+      el.style.order = "9";
+    }
+    popup.append(separator, more);
+    layout.added.push(separator, more);
+    // In the order the menu shows them.
+    for (const el of layout.order.filter((el) => items.includes(el))) {
+      moveItem(el, morePopup, layout);
+    }
+  }
+
+  /* ---------- icon styles ---------- */
+
+  // The style sheet of an icon style other than Zen's (chrome.css draws
+  // those): context-menu/icons/<id>.css, see scripts/build_icon_packs.mjs.
+  const packSheet = (id) =>
+    new URL(`context-menu/icons/${id}.css`, SCRIPT_URL).href;
+
+  // Each style sheet applies only while its style is picked (-moz-pref() in
+  // it), so they're all loaded and switching applies at once. Its icons are
+  // made absolute chrome:// addresses first: an url() in a custom property
+  // (--menu-image) is resolved against the style sheet that uses it,
+  // chrome.css, and only an SVG from a chrome:// or resource:// address takes
+  // the menu's text color (a file:// one is drawn black).
+  async function loadIconPacks() {
+    const utils = window.windowUtils;
+    for (const { id } of Z.ICON_PACKS) {
+      if (id === "zen") {
+        continue;
+      }
+      try {
+        const source = packSheet(id);
+        const css = (await (await fetch(source)).text()).replace(
+          /url\("([^"]+)"\)/g,
+          (_, url) => `url("${new URL(url, source).href}")`,
+        );
+        if (unloaded) {
+          return;
+        }
+        const sheet = `data:text/css;charset=utf-8,${encodeURIComponent(css)}`;
+        utils.loadSheetUsingURIString(sheet, utils.USER_SHEET);
+        cleanups.push(() =>
+          utils.removeSheetUsingURIString(sheet, utils.USER_SHEET),
+        );
+      } catch (ex) {
+        log(`couldn't load the ${id} icons`, ex);
+      }
+    }
+  }
+
+  /* ---------- icon color ---------- */
+
+  // Menus whose icons were given their labels' color.
+  const tinted = new Set();
+
+  // Restored icons take the color the menu's labels are drawn in (chrome.css
+  // reads --calmer-icon-fill). Some themes color the labels but not the
+  // entries, whose color the icons would take otherwise: black on a dark
+  // menu. Any menu, not just the managed ones: the icons are in all of them.
+  function tintIcons(popup) {
+    if (
+      !Services.prefs.getBoolPref("uc.fixcontext.restoreicons", false) &&
+      !Services.prefs.getBoolPref("uc.fixcontext.tabactions", false)
+    ) {
+      return;
+    }
+    for (const item of popup.children) {
+      if (
+        !/^menu(item)?$/.test(item.localName) ||
+        item.hidden ||
+        item.hasAttribute("disabled")
+      ) {
+        continue;
+      }
+      const label = item.querySelector(
+        item.hasAttribute("highlightable")
+          ? ":scope > .menu-highlightable-text"
+          : ":scope > .menu-text",
+      );
+      if (label) {
+        popup.style.setProperty(
+          "--calmer-icon-fill",
+          window.getComputedStyle(label).color,
+        );
+        tinted.add(popup);
+        return;
+      }
+    }
+  }
+
   // On the window, so it runs after the menu's own listeners (Firefox's,
   // Zen's and other mods') have decided what to show.
   function onPopupShowing(event) {
@@ -242,13 +500,22 @@
     if (popup.localName !== "menupopup" || event.defaultPrevented) {
       return;
     }
-    const root = rootMenuOf(popup);
+    try {
+      tintIcons(popup);
+    } catch (ex) {
+      log(ex);
+    }
+    // "More options" holds items of its menu, which were dealt with there.
+    const root = !ownElement(popup) && rootMenuOf(popup);
     if (!root) {
       return;
     }
     try {
       watch(popup, root);
       apply(popup, root);
+      if (popup === root) {
+        rearrange(popup, root);
+      }
     } catch (ex) {
       log(ex);
     }
@@ -256,7 +523,10 @@
 
   function onPopupShown(event) {
     const popup = event.target;
-    const root = popup.localName === "menupopup" && rootMenuOf(popup);
+    const root =
+      popup.localName === "menupopup" &&
+      !ownElement(popup) &&
+      rootMenuOf(popup);
     if (root) {
       // Labels are filled in by Fluent right after the menu shows.
       setTimeout(() => {
@@ -269,6 +539,7 @@
 
   function onPopupHidden(event) {
     restore(event.target);
+    unarrange(event.target);
   }
 
   /* ---------- what the menus showed ---------- */
@@ -438,8 +709,10 @@
     const hid = states.get(popup)?.hid ?? new Set();
     const entries = [];
     let prev = null;
-    for (const el of inShownOrder(popup)) {
-      if (!hid.has(el) && !shown(el)) {
+    // As Firefox and Zen made it, before quick actions and "More options".
+    const order = layouts.get(popup)?.order ?? inShownOrder(popup);
+    for (const el of order) {
+      if (ownElement(el) || !el.isConnected || (!hid.has(el) && !shown(el))) {
         continue;
       }
       if (isSeparator(el)) {
@@ -493,36 +766,48 @@
 
   /* ---------- the settings page's view of the menus ---------- */
 
-  // Icons the "Restore icons" option gives items, read from chrome.css next
-  // to this script, so the settings page can show them too.
-  let cssIconsPromise = null;
+  // Icons the "Icons for every option" option gives items, read from
+  // chrome.css next to this script and the picked icon style's style sheet,
+  // so the settings page can show them too.
+  const iconsByPack = new Map();
   function cssIcons() {
-    cssIconsPromise ??= (async () => {
-      const icons = new Map();
+    let pack = Services.prefs.getStringPref(Z.PREF_ICON_PACK, "zen");
+    if (!Z.ICON_PACKS.some(({ id }) => id === pack)) {
+      pack = "zen";
+    }
+    if (!iconsByPack.has(pack)) {
+      const sources = [new URL("chrome.css", SCRIPT_URL).href];
+      if (pack !== "zen") {
+        sources.push(packSheet(pack));
+      }
+      iconsByPack.set(pack, readIcons(sources));
+    }
+    return iconsByPack.get(pack);
+  }
+
+  async function readIcons(sources) {
+    const icons = new Map();
+    for (const source of sources) {
       try {
-        const response = await fetch(new URL("chrome.css", SCRIPT_URL).href);
+        const response = await fetch(source);
         const css = (await response.text()).replace(/\/\*[\s\S]*?\*\//g, "");
-        const start = css.indexOf('-moz-pref("uc.fixcontext.restoreicons")');
-        if (start < 0) {
-          return icons;
-        }
         const rule = /([^{};]+)\{\s*--menu-image:\s*url\("([^"]+)"\)/g;
-        for (const [, selectors, url] of css.slice(start).matchAll(rule)) {
+        for (const [, selectors, url] of css.matchAll(rule)) {
           for (const selector of splitSelectors(selectors)) {
             const id =
               /^#([\w-]+)$/.exec(selector)?.[1] ??
               /^(?:menu|menuitem)\[id="([^"]+)"\]$/.exec(selector)?.[1];
             if (id && !url.startsWith("data:")) {
-              icons.set(`#${id}`, url);
+              // A pack's icons are next to its style sheet.
+              icons.set(`#${id}`, new URL(url, source).href);
             }
           }
         }
       } catch {
-        // No chrome.css next to the script (installed by hand): no icons.
+        // Not next to the script (installed by hand): no icons from it.
       }
-      return icons;
-    })();
-    return cssIconsPromise;
+    }
+    return icons;
   }
 
   function splitSelectors(text) {
@@ -652,13 +937,15 @@
         saved?.label ||
         info.label ||
         humanize(key);
+      // The mod's icon in the picked style first: the one saved is in the
+      // style the menu was last opened with.
       const row = {
         label,
         icon:
           ownIcon(el) ??
-          saved?.icon ??
           icons.get(key) ??
           icons.get(canonical) ??
+          saved?.icon ??
           null,
         source: info.extension
           ? extensionName(key) || saved?.source || "Extension"
@@ -697,7 +984,7 @@
       const row = {
         key: canonical,
         label: Z.LABELS[canonical] || item.label || humanize(key),
-        icon: item.icon ?? icons.get(key) ?? null,
+        icon: icons.get(key) ?? item.icon ?? null,
         source: item.source ?? null,
         extension: !!item.extension,
         situational: false,
@@ -764,7 +1051,11 @@
         .map(([name, snap]) => ({
           context: name.split("/")[1] ?? null,
           at: snap.at,
-          entries: snap.entries,
+          entries: snap.entries.map((entry) =>
+            entry.key && icons.has(entry.key)
+              ? { ...entry, icon: icons.get(entry.key) }
+              : entry,
+          ),
         }))
         .sort((a, b) => b.at - a.at);
       menus.push({
@@ -847,17 +1138,27 @@
     setDefaultPrefs();
     migrateLegacyPrefs();
     readHidden();
+    loadIconPacks().catch(log);
 
     window.addEventListener("popupshowing", onPopupShowing);
     window.addEventListener("popupshown", onPopupShown);
     window.addEventListener("popuphidden", onPopupHidden);
+    window.addEventListener("contextmenu", onContextMenu, true);
     cleanups.push(() => {
       window.removeEventListener("popupshowing", onPopupShowing);
       window.removeEventListener("popupshown", onPopupShown);
       window.removeEventListener("popuphidden", onPopupHidden);
+      window.removeEventListener("contextmenu", onContextMenu, true);
       for (const popup of [...states.keys()]) {
         restore(popup);
       }
+      for (const popup of [...layouts.keys()]) {
+        unarrange(popup);
+      }
+      for (const popup of tinted) {
+        popup.style.removeProperty("--calmer-icon-fill");
+      }
+      tinted.clear();
     });
 
     // Hidden items changed (settings page, another window): menus that are
@@ -874,9 +1175,11 @@
       },
     };
     Services.prefs.addObserver(Z.PREF_HIDDEN, prefObserver);
-    cleanups.push(() =>
-      Services.prefs.removeObserver(Z.PREF_HIDDEN, prefObserver),
-    );
+    Services.prefs.addObserver(Z.PREF_FOLDED, prefObserver);
+    cleanups.push(() => {
+      Services.prefs.removeObserver(Z.PREF_HIDDEN, prefObserver);
+      Services.prefs.removeObserver(Z.PREF_FOLDED, prefObserver);
+    });
 
     addMenuItem();
 
@@ -915,6 +1218,7 @@
   }
 
   function unload() {
+    unloaded = true;
     for (const cleanup of cleanups.splice(0).reverse()) {
       try {
         cleanup();

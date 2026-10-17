@@ -54,7 +54,8 @@ const isMac = inZen
 
 /* ---------- options ---------- */
 
-// The style options of chrome.css (see preferences.json).
+// The style options of chrome.css (see preferences.json): switches, and
+// options with `choices` (a preference with one of their ids as its value).
 const OPTIONS = [
   {
     pref: "uc.fixcontext.ergonomicsfortabs",
@@ -62,9 +63,19 @@ const OPTIONS = [
     text: "Tab actions first (split view, mute, Essentials, pin...), then moving and organizing, then everything else, then closing.",
   },
   {
+    pref: "uc.fixcontext.tabactions",
+    title: "Quick actions in the tab menu",
+    text: "Reload, Pin, Essentials and Bookmark as a row of buttons at the top of the tab menu. Point at one to see its name.",
+  },
+  {
     pref: "uc.hidecontext.copylink",
     title: "One Copy Link option",
     text: "Show “Copy Clean Link” when a link has tracking parameters to remove, and “Copy Link” when it doesn't, instead of both.",
+  },
+  {
+    pref: "uc.hidecontext.disabled",
+    title: "Hide unavailable options",
+    text: "Hide the options Zen shows greyed out, like Paste with nothing copied or Undo with nothing to undo.",
   },
   {
     pref: "uc.fixcontext.restoreicons",
@@ -72,14 +83,30 @@ const OPTIONS = [
     text: "Show an icon next to each option, like Zen did before 1.12.9b.",
   },
   {
+    pref: "uc.fixcontext.iconpack",
+    title: "Icon style",
+    text: "For the icons above and the quick actions. Fluent and ZenUI are from Context Menu Icons by Starry-AXQG.",
+    choices: Z.ICON_PACKS,
+  },
+  {
     pref: "uc.hidecontext.icons",
     title: "No icons",
     text: "Hide the icons menus show (extensions, containers...), except checkmarks.",
   },
   {
+    pref: "uc.fixcontext.grayscaleicons",
+    title: "Gray extension icons",
+    text: "Draw the icons of extensions' options in grays, in color again under the pointer.",
+  },
+  {
     pref: "uc.hidecontext.separators",
     title: "No separators",
     text: "Hide the lines between groups of options.",
+  },
+  {
+    pref: "uc.fixcontext.faintseparators",
+    title: "Faint separators",
+    text: "Draw the lines between groups of options at half strength.",
   },
   {
     pref: "uc.fixcontext.applyzengradient",
@@ -101,6 +128,12 @@ const OPTIONS = [
 ];
 
 const optionValue = (option) => {
+  if (option.choices) {
+    const value = prefs.getString(option.pref, option.choices[0].id);
+    return option.choices.some(({ id }) => id === value)
+      ? value
+      : option.choices[0].id;
+  }
   const fallback = option.invert || Z.DEFAULT_ON.includes(option.pref);
   const value = prefs.getBool(option.pref, fallback);
   return option.invert ? !value : value;
@@ -175,6 +208,9 @@ function ago(time) {
 let catalog = { menus: [] };
 let hidden = Z.parseHidden(prefs.getString(Z.PREF_HIDDEN, "[]"));
 let lastSaved = Z.serializeHidden(hidden);
+// Items in "More options" (see foldItems in context-menu.uc.js).
+let folded = Z.parseHidden(prefs.getString(Z.PREF_FOLDED, "[]"));
+let lastSavedFolded = Z.serializeHidden(folded);
 let current = decodeURIComponent(location.hash.slice(1)) || "tabContextMenu";
 let context = null;
 let query = "";
@@ -184,6 +220,8 @@ const unfolded = new Set();
 function save() {
   lastSaved = Z.serializeHidden(hidden);
   prefs.setString(Z.PREF_HIDDEN, lastSaved);
+  lastSavedFolded = Z.serializeHidden(folded);
+  prefs.setString(Z.PREF_FOLDED, lastSavedFolded);
 }
 
 const currentMenu = () =>
@@ -211,6 +249,16 @@ function setHidden(key, hide) {
   render({ focusKey: key });
 }
 
+function setFolded(key, fold) {
+  if (fold) {
+    folded.add(key);
+  } else {
+    folded.delete(key);
+  }
+  save();
+  render();
+}
+
 /* ---------- item list ---------- */
 
 const matches = (row) =>
@@ -219,8 +267,14 @@ const matches = (row) =>
     text.toLowerCase().includes(query),
   );
 
-function renderRow(row, parentOff = false, inRareGroup = false) {
+function renderRow(
+  row,
+  parentOff = false,
+  inRareGroup = false,
+  inSubmenu = false,
+) {
   const off = hidden.has(row.key);
+  const isFolded = !inSubmenu && folded.has(row.key);
   const children = row.children.filter(
     (child) => !query || matches(row) || matches(child),
   );
@@ -285,6 +339,23 @@ function renderRow(row, parentOff = false, inRareGroup = false) {
           h("span", { class: "chevron" }),
         )
       : h("span"),
+    // Only a menu's own items fold into its "More options".
+    inSubmenu
+      ? h("span")
+      : h(
+          "button",
+          {
+            type: "button",
+            class: `fold${isFolded ? " on" : ""}`,
+            disabled: off,
+            "aria-pressed": String(isFolded),
+            title: isFolded
+              ? "In “More options” at the end of the menu. Click to put it back."
+              : "Move to “More options” at the end of the menu",
+            onclick: () => setFolded(row.key, !isFolded),
+          },
+          isFolded ? "In More options" : "More",
+        ),
     toggle,
   );
   return h(
@@ -292,7 +363,7 @@ function renderRow(row, parentOff = false, inRareGroup = false) {
     {
       class: `row${off ? " off" : ""}${off && open ? " parent-off" : ""}${
         row.situational && !inRareGroup ? " rare" : ""
-      }`,
+      }${isFolded && !off ? " folded" : ""}`,
       title:
         row.situational && !inRareGroup
           ? "Zen hasn't shown this item yet. It's only in some situations, or not used in Zen."
@@ -304,7 +375,7 @@ function renderRow(row, parentOff = false, inRareGroup = false) {
           "ul",
           { class: "children" },
           children.map((child) =>
-            renderRow(child, off || parentOff, inRareGroup),
+            renderRow(child, off || parentOff, inRareGroup, true),
           ),
         )
       : null,
@@ -477,11 +548,29 @@ function renderPreview() {
     );
   }
 
-  const entries = source.entries.map((entry) => ({
+  const all = source.entries.map((entry) => ({
     ...entry,
     key: entry.key && Z.canonicalKey(entry.key),
     visible: entry.separator || !hidden.has(Z.canonicalKey(entry.key)),
   }));
+  // Folded items go into "More options", at the end.
+  const inMore = all.filter(
+    (entry) => !entry.separator && entry.visible && folded.has(entry.key),
+  );
+  const entries = all.filter((entry) => !inMore.includes(entry));
+  if (inMore.length) {
+    entries.push(
+      { separator: true, visible: true },
+      {
+        key: "#calmer-more-options",
+        label: "More options",
+        icon: MORE_ICON,
+        submenu: true,
+        visible: true,
+        title: inMore.map((entry) => entry.label).join(", "),
+      },
+    );
+  }
   const dropped = Z.separatorsToHide(entries);
   preview.replaceChildren(
     ...entries
@@ -506,6 +595,7 @@ function renderPreview() {
                 {
                   class: `p-item${entry.disabled ? " disabled" : ""}`,
                   "data-key": entry.key,
+                  title: entry.title ?? null,
                   onmouseenter: () => highlight(entry.key, true),
                   onmouseleave: () => highlight(entry.key, false),
                 },
@@ -530,6 +620,9 @@ function renderPreview() {
       } (${ago(source.at)}), without the items you hide.`
     : "Open this menu once to see exactly what it shows.";
 }
+
+// "More options"'s icon, as chrome.css gives it.
+const MORE_ICON = "chrome://browser/skin/zen-icons/menu.svg";
 
 // The Back, Forward, Reload and Bookmark buttons on top of the page menu.
 const NAVIGATION_ICONS = ["back", "forward", "reload", "bookmark-hollow"].map(
@@ -558,29 +651,79 @@ function highlight(key, on) {
 
 /* ---------- options ---------- */
 
+// A few of each icon style's icons, for its button.
+const SAMPLE_ICONS = ["edit-copy", "reload", "pin", "share"];
+const sampleIcons = (pack) =>
+  SAMPLE_ICONS.map((name) =>
+    pack === "zen"
+      ? `chrome://browser/skin/zen-icons/${name}.svg`
+      : `icons/${pack}/${name}.svg`,
+  );
+
+function renderChoices(option) {
+  const value = optionValue(option);
+  return h(
+    "div",
+    { class: "option" },
+    h(
+      "span",
+      { class: "option-text" },
+      h("b", {}, option.title),
+      h("span", { class: "muted" }, option.text),
+    ),
+    h(
+      "div",
+      {
+        class: "segmented choices",
+        role: "radiogroup",
+        "aria-label": option.title,
+      },
+      option.choices.map((choice) =>
+        h(
+          "button",
+          {
+            type: "button",
+            role: "radio",
+            class: choice.id === value ? "selected" : "",
+            "aria-checked": String(choice.id === value),
+            onclick: () => {
+              prefs.setString(option.pref, choice.id);
+              renderOptions();
+            },
+          },
+          h("span", { class: "samples" }, sampleIcons(choice.id).map(icon)),
+          choice.name,
+        ),
+      ),
+    ),
+  );
+}
+
 function renderOptions() {
   document.getElementById("options").replaceChildren(
     ...OPTIONS.filter((option) => !option.macOnly || isMac).map((option) =>
-      h(
-        "label",
-        { class: "option" },
-        h(
-          "span",
-          { class: "option-text" },
-          h("b", {}, option.title),
-          h("span", { class: "muted" }, option.text),
-        ),
-        h("input", {
-          type: "checkbox",
-          class: "switch",
-          checked: optionValue(option),
-          onchange: (e) =>
-            prefs.setBool(
-              option.pref,
-              option.invert ? !e.target.checked : e.target.checked,
+      option.choices
+        ? renderChoices(option)
+        : h(
+            "label",
+            { class: "option" },
+            h(
+              "span",
+              { class: "option-text" },
+              h("b", {}, option.title),
+              h("span", { class: "muted" }, option.text),
             ),
-        }),
-      ),
+            h("input", {
+              type: "checkbox",
+              class: "switch",
+              checked: optionValue(option),
+              onchange: (e) =>
+                prefs.setBool(
+                  option.pref,
+                  option.invert ? !e.target.checked : e.target.checked,
+                ),
+            }),
+          ),
     ),
   );
 }
@@ -589,8 +732,14 @@ function renderOptions() {
 
 // The mod's own options; macOS's native-menus preference is the browser's
 // and depends on the computer, so it isn't backed up.
-const BACKUP_OPTIONS = OPTIONS.map((option) => option.pref).filter((pref) =>
-  pref.startsWith("uc."),
+const BACKUP_OPTIONS = OPTIONS.filter(
+  (option) => option.pref.startsWith("uc.") && !option.choices,
+).map((option) => option.pref);
+const BACKUP_CHOICES = Object.fromEntries(
+  OPTIONS.filter((option) => option.choices).map((option) => [
+    option.pref,
+    option.choices.map(({ id }) => id),
+  ]),
 );
 
 function backupStatus(text, { error = false } = {}) {
@@ -628,15 +777,21 @@ function pickBackupFile(name) {
 }
 
 async function exportBackup() {
-  const options = Object.fromEntries(
-    BACKUP_OPTIONS.map((pref) => [
+  const options = Object.fromEntries([
+    ...BACKUP_OPTIONS.map((pref) => [
       pref,
       prefs.getBool(pref, Z.DEFAULT_ON.includes(pref)),
     ]),
-  );
-  const text = Z.makeBackup(hidden, options);
+    ...OPTIONS.filter((option) => option.choices).map((option) => [
+      option.pref,
+      optionValue(option),
+    ]),
+  ]);
+  const text = Z.makeBackup(hidden, options, new Date(), folded);
   const name = backupName();
-  const exported = `${plural(hidden.size, "hidden item")} and the appearance settings`;
+  const exported = `${plural(hidden.size, "hidden item")}${
+    folded.size ? `, ${plural(folded.size, "folded item")}` : ""
+  } and the appearance settings`;
   if (!inZen) {
     // The sample page, in an ordinary tab: a download.
     const url = URL.createObjectURL(
@@ -671,7 +826,7 @@ async function importBackup(file) {
     if (file.size > Z.BACKUP_MAX_LENGTH) {
       throw new Error("This file is too big to be a backup.");
     }
-    backup = Z.parseBackup(await file.text(), BACKUP_OPTIONS);
+    backup = Z.parseBackup(await file.text(), BACKUP_OPTIONS, BACKUP_CHOICES);
   } catch (ex) {
     backupStatus(ex.message, { error: true });
     return;
@@ -679,24 +834,31 @@ async function importBackup(file) {
   if (
     !(await ask(
       `Replace your settings with this backup? It hides ${plural(backup.hidden.size, "item")}${
-        backup.options.size ? " and sets the appearance options" : ""
-      }.`,
+        backup.folded.size
+          ? `, moves ${plural(backup.folded.size, "item")} to “More options”`
+          : ""
+      }${backup.options.size ? " and sets the appearance options" : ""}.`,
       "Import",
     ))
   ) {
     return;
   }
   hidden = backup.hidden;
+  folded = backup.folded;
   save();
   for (const [pref, value] of backup.options) {
-    prefs.setBool(pref, value);
+    if (typeof value === "boolean") {
+      prefs.setBool(pref, value);
+    } else {
+      prefs.setString(pref, value);
+    }
   }
   renderOptions();
   render();
   backupStatus(
     `Imported ${plural(hidden.size, "hidden item")}${
-      backup.options.size ? " and the appearance settings" : ""
-    }.`,
+      folded.size ? `, ${plural(folded.size, "folded item")}` : ""
+    }${backup.options.size ? " and the appearance settings" : ""}.`,
   );
 }
 
@@ -803,8 +965,18 @@ prefs.observe(
         lastSaved = Z.serializeHidden(hidden);
         render();
       }
+    } else if (name === Z.PREF_FOLDED) {
+      if (prefs.getString(Z.PREF_FOLDED, "[]") !== lastSavedFolded) {
+        folded = Z.parseHidden(prefs.getString(Z.PREF_FOLDED, "[]"));
+        lastSavedFolded = Z.serializeHidden(folded);
+        render();
+      }
     } else {
       renderOptions();
+      // The list shows the picked style's icons.
+      if (name === Z.PREF_ICON_PACK) {
+        refresh();
+      }
     }
   },
 );

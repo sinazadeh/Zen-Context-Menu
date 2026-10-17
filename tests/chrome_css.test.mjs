@@ -72,3 +72,17 @@ test("urls point at browser resources or inline data", () => {
   }
   assert.ok(extractChromeUrls(css).size > 0);
 });
+
+test("hiding unavailable options covers the menus the settings page lists", async () => {
+  const { readFile: read } = await import("node:fs/promises");
+  const vm = await import("node:vm");
+  const Z = vm.runInNewContext(
+    `${await read(new URL("../context-menu/menus.js", import.meta.url), "utf8")}; ZenContextMenuShared`,
+    {},
+  );
+  const start = code.indexOf('@media -moz-pref("uc.hidecontext.disabled")');
+  assert.ok(start >= 0);
+  const block = code.slice(start, code.indexOf("[disabled]", start));
+  const menus = [...block.matchAll(/#([\w-]+)/g)].map((m) => m[1]);
+  assert.deepEqual(menus.sort(), Array.from(Z.MENUS, (menu) => menu.id).sort());
+});

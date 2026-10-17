@@ -45,6 +45,7 @@ const FIREFOX_SOURCES = [
   "browser/base/content/main-popupset.inc.xhtml",
   "browser/base/content/navigator-toolbox.inc.xhtml",
   "browser/components/places/content/placesContextMenu.inc.xhtml",
+  "browser/components/extensions/parent/ext-menus.js",
   "browser/components/urlbar/content/SmartbarInput.mjs",
   "browser/components/urlbar/content/UrlbarInputBase.mjs",
   "browser/components/sharing/SharingUtils.sys.mjs",
@@ -146,6 +147,10 @@ async function checkRef(ref, css) {
       ),
     ]);
     sources.forEach(addSource);
+    // Elements the mod's script adds (the quick actions, "More options").
+    addSource(
+      await readFile(new URL("../context-menu.uc.js", import.meta.url), "utf8"),
+    );
     for (const jar of jars) {
       for (const url of extractJarUrls(jar)) defined.urls.add(url);
     }

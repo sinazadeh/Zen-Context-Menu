@@ -303,7 +303,7 @@ button.group-head:hover h3 {
 
 .row-main {
   display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) auto auto;
+  grid-template-columns: 18px minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
@@ -388,6 +388,37 @@ button.group-head:hover h3 {
 .row.off > .row-main .row-label > span:first-child {
   text-decoration: line-through;
   text-decoration-color: color-mix(in srgb, var(--muted) 70%, transparent);
+}
+
+/* Moves an item into "More options" */
+.fold {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+}
+.row-main:is(:hover, :focus-within) .fold,
+.fold.on {
+  opacity: 1;
+}
+.fold:hover {
+  background: var(--hover);
+  border-color: var(--border);
+  color: var(--text);
+}
+.fold.on {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.fold:disabled {
+  visibility: hidden;
 }
 
 .disclose {
@@ -514,6 +545,29 @@ button.group-head:hover h3 {
   flex: 1;
   display: grid;
   gap: 2px;
+}
+.option:has(.choices) {
+  flex-wrap: wrap;
+  cursor: default;
+}
+
+/* The icon styles, each with a few of its icons */
+.choices button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+}
+.choices .samples {
+  display: flex;
+  gap: 4px;
+}
+.choices .samples img {
+  width: 16px;
+  height: 16px;
+  -moz-context-properties: fill, fill-opacity;
+  fill: currentColor;
 }
 
 /* ---------- backup ---------- */
