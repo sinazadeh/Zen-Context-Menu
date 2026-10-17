@@ -14,9 +14,12 @@
 // tag of the version in Zen's surfer.json. Needs git and network access.
 //
 // A missing id means an option silently stopped doing anything; see AGENTS.md
-// ("Keeping up with Zen") for how to find where an item went.
+// ("Keeping up with Zen") for how to find where an item went. It also checks
+// that the menus context-menu/menus.js lists still exist: a missing one
+// disappears from the settings page.
 
 import { execFileSync } from "node:child_process";
+import vm from "node:vm";
 import { appendFile, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -29,6 +32,11 @@ import {
 } from "./css_targets.mjs";
 import { latestZenRelease, ZEN_REPO } from "./zen_release.mjs";
 const FIREFOX_RAW = "https://raw.githubusercontent.com/mozilla-firefox/firefox";
+const { MENUS } = vm.runInNewContext(
+  `${await readFile(new URL("../context-menu/menus.js", import.meta.url), "utf8")}
+   ZenContextMenuShared;`,
+  {},
+);
 
 // Firefox files defining the menus and icons chrome.css uses. Zen's own
 // sources are scanned whole (see ZEN_PATHS), as its files move around more.
@@ -43,7 +51,6 @@ const FIREFOX_SOURCES = [
   "toolkit/actors/SelectParent.sys.mjs",
   "toolkit/content/editMenuOverlay.js",
   "toolkit/content/widgets/menu.js",
-  "toolkit/content/widgets/moz-input-box.js",
 ];
 const FIREFOX_JARS = [
   "browser/themes/shared/jar.inc.mn",
@@ -145,7 +152,13 @@ async function checkRef(ref, css) {
 
     return {
       heading: `Zen ${zenVersion} (${zenRef}) on Firefox ${firefoxVersion}`,
-      problems: findMissingTargets(css, defined),
+      problems: [
+        ...findMissingTargets(css, defined),
+        ...MENUS.filter((menu) => !defined.ids.has(menu.id)).map(
+          (menu) =>
+            `#${menu.id} (${menu.name} in menus.js) is not defined anymore`,
+        ),
+      ],
     };
   } finally {
     await rm(dir, { recursive: true, force: true });

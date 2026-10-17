@@ -23,6 +23,29 @@ test("theme.json points at files that exist", async () => {
   for (const field of ["style", "preferences", "readme"]) {
     await access(new URL(theme[field], ROOT));
   }
+  // The script and what it loads from the folder next to it.
+  for (const script of Object.keys(theme.scripts)) {
+    await access(new URL(script, ROOT));
+  }
+  for (const file of [
+    "menus.js",
+    "settings.html",
+    "settings.css",
+    "settings.js",
+    "sample.js",
+  ]) {
+    await access(new URL(`context-menu/${file}`, ROOT));
+  }
+});
+
+test("the script runs in browser windows and can be switched off live", () => {
+  assert.deepEqual(theme.scripts, {
+    "context-menu.uc.js": {
+      include: ["chrome://browser/content/browser.xhtml"],
+    },
+  });
+  // context-menu.uc.js registers an unload listener with Sine.
+  assert.equal(theme.supportsUnload, true);
 });
 
 test("the version matches the changelog and chrome.css", async () => {

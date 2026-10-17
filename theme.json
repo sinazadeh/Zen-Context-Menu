@@ -1,16 +1,22 @@
 {
   "id": "zen-context-menu",
   "name": "Zen Context Menu",
-  "description": "Declutter your right click menu, hide options you don't need",
+  "description": "Declutter Zen's right click menus: hide any option, including ones from Zen, other mods and extensions, from a clean settings page",
   "homepage": "https://github.com/sinazadeh/Zen-Context-Menu",
   "style": "chrome.css",
   "readme": "README.md",
   "preferences": "preferences.json",
   "image": "https://raw.githubusercontent.com/sinazadeh/Zen-Context-Menu/main/image.png",
   "author": "KiKaraage, sinazadeh",
-  "version": "4.0.0",
-  "tags": ["context menu"],
+  "version": "5.0.0",
+  "tags": ["context menu", "declutter"],
   "fork": ["zen"],
   "createdAt": "2024-10-06",
-  "updatedAt": "2026-09-28"
+  "updatedAt": "2026-10-17",
+  "scripts": {
+    "context-menu.uc.js": {
+      "include": ["chrome://browser/content/browser.xhtml"]
+    }
+  },
+  "supportsUnload": true
 }
