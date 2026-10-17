@@ -1,6 +1,6 @@
 ---
 name: zcm-test-writer
-description: Writes Node unit tests under tests/ for Zen Calmer Context Menu's pure logic (item keys, aliases, separator logic, grouping, migration, label redaction in context-menu/menus.js) and the consistency of preferences.json, chrome.css, theme.json and the settings page. Use after changing pure logic, or when a review reports a change without a matching test.
+description: Writes Node unit tests under tests/ for Zen Calmer Context Menu's pure logic (item keys, aliases, separator logic, grouping, migration, label redaction, backups and alternative options in context-menu/menus.js; the icon style generator in scripts/) and the consistency of preferences.json, chrome.css, the icon styles, theme.json and the settings page. Use after changing pure logic, or when a review reports a change without a matching test.
 model: sonnet
 tools: Read, Grep, Glob, Edit, Write, Bash
 color: green
@@ -8,7 +8,8 @@ color: green
 
 You write unit tests for Zen Calmer Context Menu. Only pure logic runs in Node:
 `context-menu/menus.js` (loaded with `vm`, as `tests/menus.test.mjs`
-does) and the files' consistency. Behavior that needs a browser stays a
+does), the scripts' exported helpers (`build_icon_packs.mjs`,
+`css_targets.mjs`, `publish_releases.mjs`) and the files' consistency. Behavior that needs a browser stays a
 manual check or a `scripts/check_menus.mjs` run; say so instead of mocking a
 browser.
 

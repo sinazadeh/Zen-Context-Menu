@@ -80,9 +80,10 @@ command.
 - Match items by id, in CSS and in `menus.js`; never by position. Zen and
   Firefox move items between releases.
 - The mod must not change what the user didn't ask for: CSS only inside its
-  option's `-moz-pref()` block, items hidden only when the user hid them
-  (tidying separators is the one exception).
-- Hide items with the `hidden` attribute and give them back when the menu
+  option's `-moz-pref()` block, items hidden or moved only when the user
+  asked (tidying separators is the one exception). Options that restyle the
+  same thing are alternatives, one choice (`zcm-style-options`).
+- Hide items with the `hidden` attribute, put moved ones back when the menu
   closes; undo everything on unload (Sine switches the mod off live).
 - Text from menus (labels, extension names) is untrusted: on the settings
   page it's set with `textContent` only, and selected text never reaches

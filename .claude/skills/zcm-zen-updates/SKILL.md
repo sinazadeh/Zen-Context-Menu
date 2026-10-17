@@ -17,7 +17,9 @@ workflows watch for that:
   Zen's `surfer.json`. When Firefox deletes one of the files it lists
   (`FIREFOX_SOURCES`), the whole check fails: find where the ids moved and
   update the list (Firefox 158 removed `moz-input-box.js`;
-  `.textbox-contextmenu` lives in `editMenuOverlay.js`).
+  `.textbox-contextmenu` lives in `editMenuOverlay.js`;
+  `.webextension-menuitem` is set in `ext-menus.js`). The ids of what
+  `context-menu.uc.js` adds (`calmer-*`) count as defined.
 - **Menus** (`scripts/check_menus.mjs`) downloads the latest Zen for Linux,
   opens the menus in `menu_scenarios.mjs` with no option on, the defaults,
   and each option on, then loads `context-menu.uc.js` and hides
@@ -27,7 +29,10 @@ workflows watch for that:
   Tab, Move Tab or the other spaces, Copy Link / Copy Clean Link not
   swapping, restored icons out of line, a hidden item showing, an item
   staying hidden once the list is cleared, an old option not migrated, or a
-  script error.
+  script error. It runs the on/off options only ("Hide unavailable options"
+  may hide any item that's greyed out); the icon style is a dropdown, whose
+  sheets the unit tests check, and the quick actions and "More options" need
+  the probes in `zcm-browser-validation`.
 
 ## Fixing a failure
 
@@ -41,7 +46,12 @@ workflows watch for that:
    `browser/components/tabbrowser/content/tab-context-menu.js`. In a running
    browser, the Browser Toolbox (`Ctrl+Shift+Alt+I`) with "Disable popup
    auto-hide" shows a menu's real items.
-3. An id gone from `chrome.css`'s icons: drop it or point it at the new id.
+3. An id gone from `chrome.css`'s icons: drop it or point it at the new id,
+   in `context-menu/icons/packs.json`'s `items` too if it's there (the
+   tests flag a key with no rule), then run
+   `node scripts/build_icon_packs.mjs`. A quick action's id
+   (`TAB_ACTIONS` in the script, and its icon in the quick actions block)
+   moves the same way.
    A renamed item a user had hidden comes back; the settings page lists the
    new one, so there's nothing to migrate unless the old id is in
    `LEGACY_PREFS`. Update `ALIASES`, `LABELS` and the page menu's `sections`

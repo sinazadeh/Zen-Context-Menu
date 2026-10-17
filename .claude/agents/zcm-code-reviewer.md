@@ -22,12 +22,13 @@ introduces or exposes.
 
 Open `AGENTS.md`, then:
 
-| Diff touches                                 | Skill                                     |
-| -------------------------------------------- | ----------------------------------------- |
-| `context-menu.uc.js`, `context-menu/`        | `.claude/skills/zcm-item-list/SKILL.md`   |
-| the start or end of the script, `theme.json` | `.claude/skills/zcm-loader/SKILL.md`      |
-| `scripts/`, `.github/workflows/`             | `.claude/skills/zcm-zen-updates/SKILL.md` |
-| `chrome.css`, `preferences.json`             | leave to `zcm-css-reviewer`               |
+| Diff touches                                  | Skill                                       |
+| --------------------------------------------- | ------------------------------------------- |
+| `context-menu.uc.js`, `context-menu/`         | `.claude/skills/zcm-item-list/SKILL.md`     |
+| `context-menu/icons/`, `build_icon_packs.mjs` | `.claude/skills/zcm-style-options/SKILL.md` |
+| the start or end of the script, `theme.json`  | `.claude/skills/zcm-loader/SKILL.md`        |
+| `scripts/`, `.github/workflows/`              | `.claude/skills/zcm-zen-updates/SKILL.md`   |
+| `chrome.css`, `preferences.json`              | leave to `zcm-css-reviewer`                 |
 
 ## What to look for
 
@@ -39,14 +40,23 @@ Open `AGENTS.md`, then:
    its menu closes or the mod unloads.
 3. **Separators**: tidied in shown order (CSS `order`), never un-hiding one
    Firefox hid.
-4. **Lifecycle**: everything `init()` registers is undone by `unload()`;
+4. **Moving items** (quick actions, "More options"): each move recorded and
+   undone in reverse on `popuphidden` and unload; only items that are
+   showing and the user asked for; the script's own elements (`calmer-*`)
+   skipped when keying and recording; `record()` uses the order from before
+   the moves; nothing set on an item that isn't removed again (tooltips).
+5. **Lifecycle**: everything `init()` registers is undone by `unload()`
+   (style sheets, observers, the tooltip); async work checks `unloaded`;
    loading twice in a window works.
-5. **Recording**: labels pass through `withoutSelection` before being saved;
+6. **Alternatives**: switching one option of an `EXCLUSIVE_OPTIONS` group on
+   switches the others off, in the script and on the settings page, with
+   the first winning when several are on (as in `chrome.css`).
+7. **Recording**: labels pass through `withoutSelection` before being saved;
    the data file is validated when read and merged before writing.
-6. **Settings page**: untrusted text set only through `textContent`; prefs
+8. **Settings page**: untrusted text set only through `textContent`; prefs
    written once per change; works with sample data outside Zen.
-7. **Tests**: pure logic in `menus.js` changed without a test in
-   `tests/menus.test.mjs`.
+9. **Tests**: pure logic in `menus.js` or `scripts/` changed without a test
+   in `tests/`.
 
 ## Verify before reporting
 

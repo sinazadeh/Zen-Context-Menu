@@ -40,19 +40,33 @@ description: How Sine and fx-autoconfig load Zen Calmer Context Menu - theme.jso
 `window.addUnloadListener` (Sine keys it by the caller's file name), and
 Sine calls it when the mod is switched off, updated or removed, then loads
 the script again if needed. `unload()` must undo everything `init()` did:
-window listeners, the prefs observer, the progress listener and hooked
-settings pages, hidden items in open menus (`restore`), and the
-"Customize Context Menus…" item. The script also unloads a previous copy in
-the same window before starting, in case it's loaded twice.
+window listeners, the prefs observers (hidden and folded items, the
+alternative options), the progress listener and hooked settings pages,
+hidden items in open menus (`restore`) and moved ones (`unarrange`: quick
+actions, "More options"), the icon styles' style sheets, the quick actions'
+tooltip, and the "Customize Context Menus…" item. Work that finishes after
+an `await` checks `unloaded` first (`loadIconPacks`). The script also
+unloads a previous copy in the same window before starting, in case it's
+loaded twice.
 
 ## Finding its own files
 
 `SCRIPT_URL` comes from `Components.stack.filename` (the last part after
-" -> "), and `menus.js`, the settings page and `chrome.css` are resolved
-next to it. That works for `chrome://sine/content/zen-context-menu/` and for
-fx-autoconfig's `chrome://userchromejs/content/` alike, as long as the
-`context-menu` folder sits next to the script. `loadSubScript` refuses
-`file://` URLs: always load from a chrome:// package.
+" -> "), and `menus.js`, the settings page, `chrome.css` and the icon styles
+(`context-menu/icons/<pack>.css` and their SVGs) are resolved next to it.
+That works for `chrome://sine/content/zen-context-menu/` and for
+fx-autoconfig's `chrome://userchromejs/content/` (or `userscripts`) alike, as
+long as the `context-menu` folder sits next to the script. `loadSubScript`
+refuses `file://` URLs: always load from a chrome:// package.
+
+The icon styles' sheets are fetched and loaded per window as `data:` user
+sheets with their icon URLs made absolute: a relative `url()` inside a
+custom property resolves against the sheet that uses the variable
+(`chrome.css`, wherever the loader put it), and only `chrome://` and
+`resource://` SVGs get `context-fill`; a `file://` one is drawn black. Never
+point them at another site: the icons ship in the repository
+(`context-menu/icons/`, with their license), so the mod works offline and
+if Context Menu Icons' repository goes away.
 
 ## Opening the settings
 
@@ -67,5 +81,6 @@ fx-autoconfig's `chrome://userchromejs/content/` alike, as long as the
 
 `context-menu.uc.js` and the `context-menu` folder go in `chrome/JS/`;
 `chrome.css` goes in `chrome/` and is imported from `userChrome.css`. The
-settings page then has no `chrome.css` next to the script to read icons
-from and shows rows without them; nothing else changes.
+settings page then has no `chrome.css` next to the script to read Zen's
+icons from and shows rows without them (the Fluent and ZenUI ones still
+show, from `context-menu/icons/`); nothing else changes.

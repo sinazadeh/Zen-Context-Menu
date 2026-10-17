@@ -13,7 +13,9 @@ the diff or change summary you were given.
 
 - **`README.md`**: features, settings and installation. Match its headings
   and tone; keep the credits (KiKaraage for the mod, oom333/zen-tab-groups
-  for the settings page's format).
+  for the settings page's format, Starry-AXQG's Context Menu Icons for the
+  Fluent and ZenUI icons and the features taken from it, also credited in
+  the `chrome.css` header and `context-menu/icons/LICENSE`).
 - **`CHANGELOG.md`**: user-visible changes under `## [Unreleased]`, in
   `### Added` / `### Fixed` / `### Changed` / `### Removed`, written for users
   (names of options and items in bold, issue links where there is one).

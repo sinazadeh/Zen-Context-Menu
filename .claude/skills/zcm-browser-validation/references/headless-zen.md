@@ -45,4 +45,15 @@ the settings page with `gBrowser.addTrustedTab(ZenContextMenu.settingsURL)`
 and take `WebDriver:TakeScreenshot` in the chrome context after
 `window.resizeTo(...)`; set `layout.css.prefers-color-scheme.content-override`
 (0 dark, 1 light) for each theme. Popups don't appear in headless
-screenshots; describe them from the DOM instead (`menu_scenarios.mjs`).
+screenshots; describe them from the DOM instead (`menu_scenarios.mjs`):
+positions from `getBoundingClientRect()` relative to the popup (icon and
+label columns, the quick actions' row), computed `content`, `display`,
+`order` and `--menu-image`.
+
+A menu's items have no computed style until it has opened once (its shadow
+DOM, and so its slot, is built on the first `popupshowing`), so a closed
+menu reads as empty. To check an icon style, open a `menupopup` of your own
+with `menuitem`s carrying the ids to test. To check an icon is tinted, draw
+its URL in an `<img>` with `-moz-context-properties: fill; fill: red` on the
+window and count red pixels in `drawSnapshot()`: a `file://` icon, or one
+without `context-fill`, comes out black or not at all.
