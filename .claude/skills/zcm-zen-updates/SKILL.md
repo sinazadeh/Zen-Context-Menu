@@ -1,6 +1,6 @@
 ---
 name: zcm-zen-updates
-description: Keeping Zen Context Menu working when Zen or Firefox changes - the weekly selector-target and menu checks, what their failures mean, and how to find where an item went. Use when a Selector targets or Menus workflow run fails, when an item or option stops working after a Zen update, or when Zen moves to a new Firefox version.
+description: Keeping Zen Context Menu Enhanced working when Zen or Firefox changes - the weekly selector-target and menu checks, what their failures mean, and how to find where an item went. Use when a Selector targets or Menus workflow run fails, when an item or option stops working after a Zen update, or when Zen moves to a new Firefox version.
 ---
 
 # Keeping up with Zen

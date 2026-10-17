@@ -1,6 +1,6 @@
 ---
 name: zcm-loader
-description: How Sine and fx-autoconfig load Zen Context Menu - theme.json, chrome:// paths, loading the script again or unloading it live, default prefs, the Sine gear-button hook and the one-mod-per-repository rule. Use when touching theme.json, the start or end of context-menu.uc.js, how it finds its own files, or when debugging "installed but nothing happens".
+description: How Sine and fx-autoconfig load Zen Context Menu Enhanced - theme.json, chrome:// paths, loading the script again or unloading it live, default prefs, the Sine gear-button hook and the one-mod-per-repository rule. Use when touching theme.json, the start or end of context-menu.uc.js, how it finds its own files, or when debugging "installed but nothing happens".
 ---
 
 # Loaders
@@ -11,6 +11,12 @@ description: How Sine and fx-autoconfig load Zen Context Menu - theme.json, chro
   `chrome/sine-mods/<id>/` and serves it at `chrome://sine/content/<id>/`.
   `theme.json`'s `id` is `zen-context-menu`; it's deliberately not the theme
   store's UUID, so a store copy and this fork never overwrite each other.
+- The `id` stayed `zen-context-menu` when the mod became Zen Context Menu
+  Enhanced (repository `sinazadeh/zen-context-menu-enhanced`). Sine keeps an
+  installed mod's `id` across updates and only new installs read it from
+  `theme.json`, so changing it would split users between two ids, and
+  `SINE_MOD_ID` in the script (the gear-button hook) can only match one.
+  Keep it, and `zen-context-menu.json`, with their old names.
 - It loads `chrome.css` as a user style sheet and runs the `.uc.js` files in
   `scripts` on each matching window's `load` event
   (`loadSubScriptWithOptions`). Scripts from a repository only run with
