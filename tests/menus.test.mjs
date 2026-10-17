@@ -248,3 +248,87 @@ test("withoutSelection keeps the selected text out of saved labels", () => {
   // Too short to tell apart from ordinary words.
   assert.equal(Z.withoutSelection("Ship it", "hi"), "Ship it");
 });
+
+test("a backup restores the hidden items and style options it saved", () => {
+  const text = Z.makeBackup(
+    new Set(["#context_reloadTab", "#context-selectall"]),
+    {
+      "uc.hidecontext.separators": true,
+      "uc.fixcontext.ergonomicsfortabs": false,
+    },
+    new Date("2026-10-17T12:00:00Z"),
+  );
+  const data = JSON.parse(text);
+  assert.equal(data.format, "calmer-context-menu-backup");
+  assert.equal(data.version, 1);
+  assert.equal(data.exportedAt, "2026-10-17T12:00:00.000Z");
+  assert.deepEqual(data.hidden, ["#context-selectall", "#context_reloadTab"]);
+
+  const backup = Z.parseBackup(text, [
+    "uc.hidecontext.separators",
+    "uc.fixcontext.ergonomicsfortabs",
+  ]);
+  assert.deepEqual([...backup.hidden].sort(), data.hidden);
+  assert.deepEqual(Object.fromEntries(backup.options), {
+    "uc.hidecontext.separators": true,
+    "uc.fixcontext.ergonomicsfortabs": false,
+  });
+});
+
+test("a backup only sets what it's expected to", () => {
+  const text = JSON.stringify({
+    format: "calmer-context-menu-backup",
+    version: 1,
+    hidden: ["#context_unpinTab", 42, "", null, "x".repeat(1001), "#a"],
+    options: {
+      "uc.hidecontext.separators": "yes",
+      "uc.hidecontext.icons": true,
+      "browser.startup.homepage": true,
+      "widget.macos.native-context-menus": false,
+    },
+  });
+  const backup = Z.parseBackup(text, [
+    "uc.hidecontext.separators",
+    "uc.hidecontext.icons",
+  ]);
+  // Aliases become the item whose switch they follow.
+  assert.deepEqual([...backup.hidden].sort(), ["#a", "#context_pinTab"]);
+  assert.deepEqual(Object.fromEntries(backup.options), {
+    "uc.hidecontext.icons": true,
+  });
+  // No options at all is fine.
+  const noOptions = Z.parseBackup(
+    JSON.stringify({
+      format: "calmer-context-menu-backup",
+      version: 1,
+      hidden: [],
+    }),
+    ["uc.hidecontext.icons"],
+  );
+  assert.equal(noOptions.options.size, 0);
+});
+
+test("anything but a backup this version can read is refused", () => {
+  const backup = (fields) =>
+    JSON.stringify({
+      format: "calmer-context-menu-backup",
+      version: 1,
+      hidden: [],
+      ...fields,
+    });
+  const refused = [
+    ["not json", /isn't JSON/],
+    ["[]", /isn't a Calmer Context Menu backup/],
+    ["null", /isn't a Calmer Context Menu backup/],
+    [backup({ format: "something-else" }), /isn't a Calmer Context Menu/],
+    [backup({ version: undefined }), /no version/],
+    [backup({ version: "1" }), /no version/],
+    [backup({ version: 2 }), /newer version/],
+    [backup({ hidden: "#context_pinTab" }), /damaged/],
+    [backup({ hidden: new Array(10001).fill("#a") }), /damaged/],
+    [" ".repeat(Z.BACKUP_MAX_LENGTH + 1), /too big/],
+  ];
+  for (const [text, message] of refused) {
+    assert.throws(() => Z.parseBackup(text, []), message, text.slice(0, 60));
+  }
+});

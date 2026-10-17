@@ -1,5 +1,5 @@
 ---
-description: Add a style option to Zen Context Menu Enhanced end to end - chrome.css block, preferences.json, the settings page, defaults, tests and docs - then review it.
+description: Add a style option to Zen Calmer Context Menu end to end - chrome.css block, preferences.json, the settings page, defaults, tests and docs - then review it.
 argument-hint: "<what the option does, and whether it's on by default>"
 ---
 

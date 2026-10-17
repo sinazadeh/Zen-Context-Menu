@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name           Zen Context Menu Enhanced
+// @name           Zen Calmer Context Menu
 // @description    Hide the options you don't use from Zen's right-click menus, including the ones Zen, other mods and extensions add.
 // @include        main
 // ==/UserScript==
@@ -41,8 +41,7 @@
   const isSeparator = (el) => el.localName === "menuseparator";
 
   const cleanups = [];
-  const log = (...args) =>
-    console.error("[Zen Context Menu Enhanced]", ...args);
+  const log = (...args) => console.error("[Calmer Context Menu]", ...args);
 
   /* ---------- hidden items ---------- */
 

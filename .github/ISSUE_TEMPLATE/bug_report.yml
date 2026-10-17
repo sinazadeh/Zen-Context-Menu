@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting! On macOS, please check [the macOS note](https://github.com/sinazadeh/zen-context-menu-enhanced#macos) first: native menus can't be styled by mods.
+        Thanks for reporting! On macOS, please check [the macOS note](https://github.com/sinazadeh/zen-calmer-context-menu#macos) first: native menus can't be styled by mods.
 
   - type: input
     id: zen-version

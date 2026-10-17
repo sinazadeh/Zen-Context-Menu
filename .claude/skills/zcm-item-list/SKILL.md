@@ -78,6 +78,16 @@ icons" rules of `chrome.css`, which the script fetches from next to itself
 (keep those rules as `#id { --menu-image: url("…") }`). Outside Zen the page
 loads `sample.js` ([regenerating it](references/sample-data.md)).
 
+The Backup card exports `makeBackup()` (in `menus.js`): `format`,
+`version`, the hidden keys and the `uc.*` style options; the macOS
+native-menus preference is the browser's and stays out. A chrome:// page
+can't download with `<a download>`, so export goes through
+`nsIFilePicker` and `IOUtils`. An imported file is untrusted:
+`parseBackup()` takes only string keys (canonicalized) and booleans for
+known options, refuses other files and newer versions, and the page asks
+before replacing anything. Raise `BACKUP_VERSION` only for a change older
+versions would misread, and add a test in `tests/menus.test.mjs`.
+
 The look follows Tab Groups' settings page (oom333/zen-tab-groups): cards,
 switches, a sticky preview on the right. Keep new UI in that style and in
 both color schemes.

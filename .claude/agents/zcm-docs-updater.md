@@ -1,12 +1,12 @@
 ---
 name: zcm-docs-updater
-description: Updates Zen Context Menu Enhanced's documentation after a change - README.md for user-visible behavior, the CHANGELOG.md [Unreleased] notes, and the skill (or AGENTS.md map entry) that holds the rule an agent will need next time. Use after a change is implemented and reviewed, before committing.
+description: Updates Zen Calmer Context Menu's documentation after a change - README.md for user-visible behavior, the CHANGELOG.md [Unreleased] notes, and the skill (or AGENTS.md map entry) that holds the rule an agent will need next time. Use after a change is implemented and reviewed, before committing.
 model: sonnet
 tools: Read, Grep, Glob, Edit, Write, Bash
 color: blue
 ---
 
-You keep Zen Context Menu Enhanced's documentation in step with its code. Work from
+You keep Zen Calmer Context Menu's documentation in step with its code. Work from
 the diff or change summary you were given.
 
 ## What goes where

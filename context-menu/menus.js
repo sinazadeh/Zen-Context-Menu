@@ -1,4 +1,4 @@
-// The menus Zen Context Menu Enhanced manages, and the logic shared by the
+// The menus Zen Calmer Context Menu manages, and the logic shared by the
 // script that runs in the browser window (context-menu.uc.js) and the settings
 // page. Plain data and pure functions only: it's also loaded by the unit tests
 // in Node.
@@ -288,7 +288,7 @@ var ZenContextMenuShared = (() => {
   const MODS = [
     { name: "Second Sidebar", ids: /webpanel$|^context_sb2-/ },
     { name: "Tab Groups", ids: /^context_zsg-|^zsg-/ },
-    { name: "Zen Context Menu Enhanced", ids: /^toolbar-context-zcm-/ },
+    { name: "Calmer Context Menu", ids: /^toolbar-context-zcm-/ },
   ];
 
   /**
@@ -642,6 +642,100 @@ var ZenContextMenuShared = (() => {
   /** The value saved for a set of hidden items. */
   const serializeHidden = (keys) => JSON.stringify([...keys].sort());
 
+  // A backup file (the settings page's Backup card): the hidden items and the
+  // style options. `format` tells it apart from other JSON files; raise
+  // BACKUP_VERSION only when the shape changes in a way older versions would
+  // misread, since they refuse newer backups.
+  const BACKUP_FORMAT = "calmer-context-menu-backup";
+  const BACKUP_VERSION = 1;
+  // Real backups are a few kilobytes; these bound what an import reads.
+  const BACKUP_MAX_LENGTH = 1024 * 1024;
+  const BACKUP_MAX_ITEMS = 10000;
+  const BACKUP_MAX_KEY_LENGTH = 1000;
+
+  /**
+   * The contents of a backup file.
+   *
+   * @param {Iterable<string>} hiddenKeys
+   * @param {Object<string, boolean>} options the style options, by preference
+   * @param {Date} [date] when it was made
+   * @returns {string}
+   */
+  function makeBackup(hiddenKeys, options, date = new Date()) {
+    const backup = {
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      exportedAt: date.toISOString(),
+      hidden: [...hiddenKeys].sort(),
+      options: Object.fromEntries(Object.entries(options).sort()),
+    };
+    return `${JSON.stringify(backup, null, 2)}\n`;
+  }
+
+  /**
+   * Reads a backup file. It can come from anywhere, so only what's expected
+   * is taken: item keys that are strings, and true or false for the style
+   * options in `optionPrefs`; everything else is ignored.
+   *
+   * @param {string} text the file's contents
+   * @param {Array<string>} optionPrefs the preferences a backup may set
+   * @returns {{hidden: Set<string>, options: Map<string, boolean>}}
+   * @throws {Error} saying why, for the user, if it can't be restored
+   */
+  function parseBackup(text, optionPrefs) {
+    if (typeof text !== "string" || text.length > BACKUP_MAX_LENGTH) {
+      throw new Error("This file is too big to be a backup.");
+    }
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error("This file isn't a backup (it isn't JSON).");
+    }
+    if (
+      !data ||
+      typeof data !== "object" ||
+      Array.isArray(data) ||
+      data.format !== BACKUP_FORMAT
+    ) {
+      throw new Error("This file isn't a Calmer Context Menu backup.");
+    }
+    if (!Number.isInteger(data.version) || data.version < 1) {
+      throw new Error("This backup has no version.");
+    }
+    if (data.version > BACKUP_VERSION) {
+      throw new Error(
+        "This backup was made by a newer version of the mod. Update the mod to restore it.",
+      );
+    }
+    if (!Array.isArray(data.hidden) || data.hidden.length > BACKUP_MAX_ITEMS) {
+      throw new Error("This backup's list of hidden items is damaged.");
+    }
+    const hidden = new Set(
+      data.hidden
+        .filter(
+          (key) =>
+            typeof key === "string" &&
+            key.length > 0 &&
+            key.length <= BACKUP_MAX_KEY_LENGTH,
+        )
+        .map(canonicalKey),
+    );
+    const values =
+      data.options &&
+      typeof data.options === "object" &&
+      !Array.isArray(data.options)
+        ? data.options
+        : {};
+    const options = new Map();
+    for (const pref of optionPrefs) {
+      if (Object.hasOwn(values, pref) && typeof values[pref] === "boolean") {
+        options.set(pref, values[pref]);
+      }
+    }
+    return { hidden, options };
+  }
+
   return Object.freeze({
     MENUS,
     ALIASES,
@@ -662,5 +756,8 @@ var ZenContextMenuShared = (() => {
     parseHidden,
     serializeHidden,
     withoutSelection,
+    BACKUP_MAX_LENGTH,
+    makeBackup,
+    parseBackup,
   });
 })();

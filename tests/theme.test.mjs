@@ -57,7 +57,7 @@ test("the version matches the changelog and chrome.css", async () => {
   assert.match(
     css.split("\n")[0],
     new RegExp(
-      `^/\\* Zen Context Menu Enhanced v${theme.version.replaceAll(".", "\\.")}\\b`,
+      `^/\\* Zen Calmer Context Menu v${theme.version.replaceAll(".", "\\.")}\\b`,
     ),
   );
 });

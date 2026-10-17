@@ -10,7 +10,7 @@ import { setTimeout as sleep } from "node:timers/promises";
  */
 export const TEST_PAGE = `<!doctype html>
 <meta charset="utf-8">
-<title>Zen Context Menu Enhanced test page</title>
+<title>Zen Calmer Context Menu test page</title>
 <style>body { font: 16px sans-serif; margin: 40px } a, img, input, p { display: block; margin: 20px 0 }</style>
 <a id="tracked-link" href="https://example.com/page?utm_source=test&amp;utm_medium=x&amp;id=1">A tracked link</a>
 <a id="plain-link" href="https://example.com/plain">A plain link</a>

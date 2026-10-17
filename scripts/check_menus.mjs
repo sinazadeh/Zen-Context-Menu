@@ -134,7 +134,7 @@ async function loadScript(marionette) {
      Services.console.registerListener({
        observe(message) {
          if (message instanceof Ci.nsIScriptError && !(message.flags & Ci.nsIScriptError.warningFlag) &&
-             /zen-context-menu-check|Zen Context Menu/.test(message.sourceName + message.errorMessage)) {
+             /zen-context-menu-check|Calmer Context Menu/.test(message.sourceName + message.errorMessage)) {
            errors.push(message.errorMessage + " (" + message.sourceName + ":" + message.lineNumber + ")");
          }
        },
