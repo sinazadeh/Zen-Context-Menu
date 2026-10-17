@@ -8,6 +8,8 @@ published as a GitHub release with its notes below (see
 
 ## [Unreleased]
 
+## [5.2.0] - 2026-10-17
+
 ### Added
 
 - **Icon style**: Zen's icons, **Fluent** or **ZenUI** for "Icons for every
