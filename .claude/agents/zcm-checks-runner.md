@@ -21,12 +21,15 @@ anything: the caller decides what to change.
    - `npx prettier --check "**/*.{css,js,mjs,html,md,json,yml}"`
    - `npx eslint .`
    - `git diff --check`
-4. Only if `chrome.css`, `context-menu/menus.js` or
+4. Only if `chrome.css`, `context-menu.uc.js`, `context-menu/menus.js` or
    `scripts/check_selector_targets.mjs` changed, or the caller asks, also run
    `node scripts/check_selector_targets.mjs release dev` (needs git and
    network access; report a network failure as "not run").
 5. Run `MOZ_HEADLESS=1 node scripts/check_menus.mjs` only when the caller
    asks: it downloads Zen and takes several minutes.
+
+If `tests/icon_packs.test.mjs` fails because a style sheet is out of date,
+say that `node scripts/build_icon_packs.mjs` regenerates it.
 
 ## Report
 

@@ -29,14 +29,20 @@ uncommitted changes. Read `AGENTS.md` and
 - **Privacy.** Selected text must not be written to disk
   (`withoutSelection`); nothing should log or send page content, URLs or
   labels elsewhere.
-- **Files and prefs.** `zen-context-menu.json` and `uc.hidecontext.items`
-  can be edited by hand: they must be validated on read (`cleanData`,
-  `parseHidden`), and a bad value must not break menus.
+- **Files and prefs.** `zen-context-menu.json`, `uc.hidecontext.items`,
+  `uc.hidecontext.folded` and `uc.fixcontext.iconpack` can be edited by
+  hand: they must be validated on read (`cleanData`, `parseHidden`, the
+  icon style checked against `ICON_PACKS` before it names a file), and a
+  bad value must not break menus. Backups are untrusted files:
+  `parseBackup` takes only known options with booleans or listed values.
 - **Hooks.** The click listener in about:preferences only acts on this
   mod's gear button and is removed on unload; opened tabs use
   `addTrustedTab` with the mod's own settings URL only.
 - **Loading.** Files are loaded only from the script's own chrome://
-  package, never `file://` or a user-supplied path.
+  package, never `file://`, a user-supplied path or another site. The icon
+  styles' sheets become `data:` user sheets: only the mod's own files, with
+  URLs resolved against them, may go in, never anything from prefs, pages
+  or backups.
 
 ## Report
 

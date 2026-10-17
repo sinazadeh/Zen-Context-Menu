@@ -36,6 +36,18 @@ sources allowed, or fx-autoconfig. Then, as the change needs:
 - **Toolbar, bookmark, space and folder menus** when changing those.
 - No two separators next to each other, none at the top or bottom; with
   restored icons, labels line up.
+- **Icons**: each icon style (Zen, Fluent, ZenUI) in a light and a dark
+  theme, including one that colors labels but not items: icons in one column
+  and in the labels' color, never black. Settings page rows follow the style.
+- **Quick actions**: a regular tab, a pinned tab, an Essential and several
+  selected tabs; the names show as tooltips, the buttons work, and the menu
+  is back in order next time (check with the option off again).
+- **More options**: fold items from the settings page (the preview shows
+  them at the end), open the menu and its "More options", Shift+right-click
+  a tab for the whole menu; the next plain right-click folds again.
+- **Alternatives**: in Sine's options box, switch one of a pair on (restore
+  and hide icons, faint and no separators, gradient and color) and check the
+  other went off after reopening it.
 - **Sine**: switch the mod off (everything shows again, no restart) and back
   on; update from the previous version (old "Hide ..." options migrate).
 
