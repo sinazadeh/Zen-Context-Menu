@@ -1,4 +1,4 @@
-# Zen Context Menu Enhanced
+# Zen Calmer Context Menu
 
 > [!NOTE]
 > This is a fork of **Zen Context Menu** by [KiKaraage](https://github.com/KiKaraage), from the [Zen theme store](https://zen-browser.app/mods/81fcd6b3-f014-4796-988f-6c3cb3874db8) ([source](https://github.com/zen-browser/theme-store/tree/main/themes/81fcd6b3-f014-4796-988f-6c3cb3874db8), [author's repository](https://github.com/KiKaraage/ZenMods)). All credit for the mod and its idea goes to them. This fork keeps it working with current Zen releases (checked against **Zen 1.23.3b**, Firefox 158). Version 5 replaces the long list of "Hide ..." options with a settings page that can hide any item. Compared to v3.1 in the store:
