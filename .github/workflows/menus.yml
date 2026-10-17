@@ -21,6 +21,8 @@ on:
     paths:
       - "chrome.css"
       - "preferences.json"
+      - "context-menu.uc.js"
+      - "context-menu/**"
       - "scripts/**"
       - ".github/workflows/menus.yml"
 

@@ -6,6 +6,47 @@ what tells Sine an update is available.
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-10-17
+
+Checked against Zen 1.23.3b (Firefox 158).
+
+### Added
+
+- A settings page that lists every item of Zen's context menus (tabs, pages,
+  sidebar and toolbars, bookmarks, spaces, folders and the + button), with a
+  switch to hide each one. It includes the items Zen, other mods (such as
+  Second Sidebar and Tab Groups) and extensions add, tagged with where they
+  come from, and the items inside submenus. Open it from the sidebar's
+  context menu (**Customize Context Menus…**) or the mod's gear button in
+  Sine.
+- A preview of each menu as it looked the last time it was opened, without
+  the hidden items; the page menu keeps one for each kind of thing you
+  right-clicked (page, link, image, video, selected text, text field).
+- `context-menu.uc.js`, which hides the chosen items when a menu opens, also
+  in menus Zen or extensions fill in later, and hides separators left at the
+  top or bottom of a menu or next to each other (also when another mod leaves
+  them there). Items are shown again when
+  the menu closes, so whatever Zen does with them next is unaffected. Sine can
+  switch the mod off or update it without a restart.
+- A suggestion on the settings page to hide what version 4 hid by default.
+- The **Appearance** options on the settings page, including the macOS menu
+  switch on macOS.
+
+### Changed
+
+- The "Hide ..." options are replaced by the item list. Options you had on
+  become hidden items the first time the script runs (and are then cleared
+  from `about:config`).
+- Options that are on by default (reorder the tab menu, one Copy Link option)
+  now apply as soon as the mod runs, without opening its options in Sine first.
+- The mod now needs JavaScript (Sine with JS from unofficial sources allowed,
+  or fx-autoconfig) to hide items. `chrome.css` alone still provides the style
+  options.
+
+### Removed
+
+- The 33 "Hide ..." options from `preferences.json` and `chrome.css`.
+
 ## [4.0.0] - 2026-09-28
 
 First release of the fork, based on Zen Context Menu v3.1 from the Zen theme

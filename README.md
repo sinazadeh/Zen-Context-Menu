@@ -1,72 +1,94 @@
 # Zen Context Menu
 
 > [!NOTE]
-> This is a fork of **Zen Context Menu** by [KiKaraage](https://github.com/KiKaraage), from the [Zen theme store](https://zen-browser.app/mods/81fcd6b3-f014-4796-988f-6c3cb3874db8) ([source](https://github.com/zen-browser/theme-store/tree/main/themes/81fcd6b3-f014-4796-988f-6c3cb3874db8), [author's repository](https://github.com/KiKaraage/ZenMods)). All credit for the mod and its idea goes to them. This fork keeps it working with current Zen releases (checked against **Zen 1.22.3b**, Firefox 156). Compared to v3.1 in the store:
+> This is a fork of **Zen Context Menu** by [KiKaraage](https://github.com/KiKaraage), from the [Zen theme store](https://zen-browser.app/mods/81fcd6b3-f014-4796-988f-6c3cb3874db8) ([source](https://github.com/zen-browser/theme-store/tree/main/themes/81fcd6b3-f014-4796-988f-6c3cb3874db8), [author's repository](https://github.com/KiKaraage/ZenMods)). All credit for the mod and its idea goes to them. This fork keeps it working with current Zen releases (checked against **Zen 1.23.3b**, Firefox 158). Version 5 replaces the long list of "Hide ..." options with a settings page that can hide any item. Compared to v3.1 in the store:
 >
 > - The tab context menu no longer hides **Duplicate Tab** or **Move Tab** by default. Zen lists your other spaces under Move Tab, so it was the only way to move a tab to another space ([KiKaraage/ZenMods#55](https://github.com/KiKaraage/ZenMods/issues/55)).
 > - Items are matched by id instead of by position, so a Zen or Firefox update no longer makes options hide the wrong items or leave separators stacked on top of each other ([KiKaraage/ZenMods#54](https://github.com/KiKaraage/ZenMods/issues/54)).
-> - Options that did nothing now work: **Select All Tabs** ([KiKaraage/ZenMods#63](https://github.com/KiKaraage/ZenMods/issues/63)), **Unload Tab**, **Ask AI chatbot**, **Apply space gradient** ([KiKaraage/ZenMods#64](https://github.com/KiKaraage/ZenMods/issues/64)) and **Prioritize Copy Clean Link**. **Bookmark Tab**, **Move Tab** and **Close Multiple Tabs** have their own options again instead of only being hidden by the reorder option.
+> - Options that did nothing now work: hiding **Select All Tabs** ([KiKaraage/ZenMods#63](https://github.com/KiKaraage/ZenMods/issues/63)) and **Unload Tab**, **Apply space gradient** ([KiKaraage/ZenMods#64](https://github.com/KiKaraage/ZenMods/issues/64)) and **Prioritize Copy Clean Link**.
 > - **Restore icons** draws each icon in the menu's own icon slot, so icons no longer overlap labels like "Copy" ([KiKaraage/ZenMods#56](https://github.com/KiKaraage/ZenMods/issues/56)) and every icon exists in current Zen.
-> - New options for items Zen and Firefox added since: New Tab Below, Move to Folder, Change Label/Icon, Add Route for Domain, Open Link in Glance/Split Link, Copy Link to Highlight and Google Lens.
+> - Any item can be hidden, including the ones Zen, other mods and extensions add, from a settings page with a preview of each menu.
 >
 > See the [changelog](CHANGELOG.md) for details.
 
-Declutter your right click menus: hide the options you don't need, reorder the tab context menu, and optionally bring back icons or give menus your space's colors.
+Declutter your right click menus: switch off any option you never use, from a settings page that lists every item of every menu, including the ones Zen, your other mods and your extensions add. It can also reorder the tab context menu, bring back icons or give menus your space's colors.
 
-![Zen Context Menu](image.png)
+![Settings page](previews/settings.png)
 
 ## What it can do
 
-- Reorder the tab context menu: tab actions first (split view, mute, Essentials, pin, unload, duplicate), then moving and organizing (folders, other spaces, containers), then everything else, then closing _(on by default)_
-- Hide all separators
-- Hide the icons in context menus (extension items, containers...), except checkboxes and radio buttons
-- Restore icons for context menu options, like Zen had them before 1.12.9b
-- Apply your space's gradient or accent color to menus, tab previews and other small pop-ups
-- Show "Copy Clean Link" instead of "Copy Link" when it would remove tracking parameters, and only "Copy Link" when there's nothing to remove _(on by default)_
-- Hide these options:
-  - Tabs: Bookmark Tab _(on by default)_, Mute Tab, New Tab Below, Move Tab, Move to Folder, Open in New Container Tab, Send Tab to Device, Close Tab & Close Duplicate Tabs, Close Multiple Tabs _(on by default)_, Select All Tabs _(on by default)_, Reload Tab _(on by default)_, Duplicate Tab, Unload Tab, Change Label & Change Icon, Add Route for Domain, Pin Tab & Add to Essentials
-  - Pages: Back/Forward/Reload/Bookmark Page buttons, Save Page As, Send Page to Device, Take Screenshot, View Page Source & Inspect, This Frame
-  - Links: Bookmark Link _(on by default)_, Save Link As, Open Link in New Container Tab, Send Link to Device, Open Link in Glance & Split Link to New Tab
-  - Selected text: Search, Search in a Private Window _(on by default)_, Translate Selection, Ask AI chatbot, Print Selection _(on by default)_, Select All _(on by default)_, Copy Link to Highlight
-  - Images and media: Email Image, Set Image as Desktop Background & View Image Info, Search Image with Google Lens, Copy/Email Video & Audio Link
-  - Text fields: Check Spelling, dictionaries and text direction
+- **Hide any menu item.** The settings page lists the tab, page, sidebar, bookmark, space and folder menus and the + button's menu, the way they appear, with a switch for each item. Items inside submenus (Move Tab, Close Multiple Tabs...) can be hidden too.
+- **Zen's, mods' and extensions' items included.** Items from Zen, from mods such as [Second Sidebar](https://github.com/sinazadeh/zen-second-sidebar-enhanced) and [Tab Groups](https://github.com/sinazadeh/zen-tab-groups), and from extensions such as 1Password are listed with a tag saying where they come from.
+- **Preview.** Each menu is shown as it looked the last time you opened it, without the items you hide. The page menu keeps one for each kind of thing you right-clicked: a page, a link, an image, selected text...
+- **No stray separators.** When you hide every item between two separators, one of them goes too, so a menu never shows two lines in a row or one at its top or bottom. This also tidies up after other mods that show or hide their items late.
+- **One switch per option.** "Pin Tab" also covers "Unpin Tab" and "Pin Tabs", "Mute" covers "Unmute", and so on.
+- **Style options:**
+  - Reorder the tab context menu: tab actions first (split view, mute, Essentials, pin, unload, duplicate), then moving and organizing (folders, other spaces, containers), then everything else, then closing _(on by default)_
+  - Show "Copy Clean Link" instead of "Copy Link" when it would remove tracking parameters, and only "Copy Link" when there's nothing to remove _(on by default)_
+  - Restore icons for context menu options, like Zen had them before 1.12.9b
+  - Hide the icons in context menus (extension items, containers...), except checkboxes and radio buttons
+  - Hide all separators
+  - Apply your space's gradient or accent color to menus, tab previews and other small pop-ups
+
+Coming from version 4 or the theme store version? The "Hide ..." options you had on become hidden items the first time version 5 runs, so your menus stay the way they were.
 
 ## Installation
 
-Use one copy of the mod at a time: if you have **Zen Context Menu** from Zen's mod store installed, remove it first. This fork uses the same settings, so your choices carry over.
+Use one copy of the mod at a time: if you have **Zen Context Menu** from Zen's mod store installed, remove it first.
 
 ### Sine
 
-1. Install [Sine](https://github.com/CosmoCreeper/Sine) if you haven't already.
-2. In Sine's mod manager, add a mod from a repository and enter:
+[Sine](https://github.com/CosmoCreeper/Sine) is a mod manager for Zen that can run script mods like this one.
+
+1. Install Sine if you haven't already.
+2. This mod runs JavaScript, so until it's listed in Sine's store, turn on **Enable installing JS from unofficial sources** in Sine's settings.
+3. In Sine's mod manager, add a mod from a repository and enter:
    ```
    sinazadeh/Zen-Context-Menu
    ```
-3. Open the mod's settings (gear button) once, even if you keep the defaults: Sine applies the options that are on by default when the settings are first shown.
-
-### Manually
-
-1. In `about:config`, set `toolkit.legacyUserProfileCustomizations.stylesheets` to `true`.
-2. Copy `chrome.css` into your profile's `chrome` folder (`about:support` → Profile Folder → Open Folder) and add `@import "chrome.css";` at the top of `chrome/userChrome.css` (create it if needed).
-3. Turn options on in `about:config`: create a boolean for each option you want, using the names in [`preferences.json`](preferences.json) (for example `uc.fixcontext.ergonomicsfortabs`). Options that are on by default in the mod managers need to be created by hand here too.
 4. Restart Zen.
+
+Updating from version 4 works the same way: update the mod in Sine (with JS from unofficial sources allowed), then restart Zen. Until the script runs, the style options keep working but no items are hidden; your old choices are kept and carried over once it does.
+
+### Manually (fx-autoconfig)
+
+1. Set up [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig) in Zen.
+2. Copy `context-menu.uc.js` **and** the `context-menu` folder into your profile's `chrome/JS/` folder (`about:support` → Profile Folder → Open Folder).
+3. For the style options, copy `chrome.css` into the `chrome` folder and add `@import "chrome.css";` at the top of `chrome/userChrome.css` (create it if needed), and set `toolkit.legacyUserProfileCustomizations.stylesheets` to `true` in `about:config`.
+4. In `about:support`, click **Clear startup cache…**, then restart Zen.
+
+Without fx-autoconfig, `chrome.css` on its own still gives you the style options (turn them on in `about:config`, using the names in [`preferences.json`](preferences.json)), but not hiding items.
 
 ### macOS
 
-macOS uses native context menus, which mods can't style. Uncheck the first option (or set `widget.macos.native-context-menus` to `false` in `about:config`) to use Zen's own menus instead, and turn it back on before removing the mod.
+macOS draws its own context menus, which mods can't restyle. Hiding items works with them too, but the style options need Zen's menus: uncheck the first option in Sine's options for the mod (or set `widget.macos.native-context-menus` to `false` in `about:config`), and turn it back on before removing the mod. The settings page has the same switch under **Appearance**.
 
 ## Settings
 
-With Sine, click the gear button of **Zen Context Menu**. Options apply right away. Every option is a boolean preference in `about:config`; see [`preferences.json`](preferences.json) for the full list with descriptions.
+Open the settings page either way:
 
-If an option stops doing anything after a Zen update, please [open an issue](https://github.com/sinazadeh/Zen-Context-Menu/issues) with your Zen version (`about:support`) and the option's name.
+- Right-click an empty part of the sidebar (or a toolbar) → **Customize Context Menus…**
+- Click the gear button of **Zen Context Menu** in Sine's mod list.
+
+Pick a menu at the top and switch off what you don't use. Changes apply the next time you open the menu, in every window. Not sure where to start? The page offers to hide what version 4 hid by default (Bookmark Tab and Bookmark Link, Reload Tab, Select All Tabs, Close Multiple Tabs, Search in a Private Window, Print Selection and Select All).
+
+A few things to know:
+
+- Extensions' items, and a few of Zen's, only exist while their menu is open. Open the menu once and they're listed.
+- Items Zen hasn't shown yet are greyed out; in the tab menu they're under **Only in some situations** (pinned tabs, several selected tabs, or Firefox features Zen doesn't use).
+- **Customize Context Menus…** is a menu item like any other, so you can hide it too; Sine's gear button still opens the page.
+- The hidden items are saved in `uc.hidecontext.items` (a list in `about:config`), and the style options as `uc.hidecontext.*` and `uc.fixcontext.*` switches. What the menus showed, for the list and the preview, is kept in `zen-context-menu.json` in your profile folder.
+
+If an item can't be hidden or an option stops doing anything after a Zen update, please [open an issue](https://github.com/sinazadeh/Zen-Context-Menu/issues) with your Zen version (`about:support`) and the item or option's name.
 
 ## Development
 
-This is a plain CSS mod with no build step: `chrome.css` is the mod, `preferences.json` its settings and `theme.json` the manifest Sine reads. Every week, CI checks that everything it points at still exists in the latest Zen and opens the real menus in it with each option on. See [CONTRIBUTING.md](CONTRIBUTING.md) for the checks to run and [AGENTS.md](AGENTS.md) for how the mod is put together and how to keep it working when Zen changes.
+There's no build step. `context-menu.uc.js` hides items as menus open and records what they show; `context-menu/` holds the settings page and the code it shares with the script; `chrome.css` holds the style options, `preferences.json` lists them and `theme.json` is the manifest Sine reads. Every week, CI checks that everything `chrome.css` points at still exists in the latest Zen and opens the real menus in it with each option on and with items hidden. See [CONTRIBUTING.md](CONTRIBUTING.md) for the checks to run and [AGENTS.md](AGENTS.md) for how the mod is put together and how to keep it working when Zen changes.
 
 ## Credits and license
 
 Zen Context Menu was created by [KiKaraage](https://github.com/KiKaraage) ([KiKaraage/ZenMods](https://github.com/KiKaraage/ZenMods)), including the preview image. This fork is maintained by [sinazadeh](https://github.com/sinazadeh). Both are released under the [MIT License](LICENSE).
+
+The settings page's format (cards with switches and a live preview, opened from the mod's gear button) follows the one [oom333/zen-tab-groups](https://github.com/oom333/zen-tab-groups) made for Tab Groups.
 
 [shanx/ZenMods](https://github.com/shanx/ZenMods) is another community fork of the mod, if you'd like to compare.

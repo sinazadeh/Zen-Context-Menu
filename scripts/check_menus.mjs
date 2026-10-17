@@ -17,6 +17,10 @@
 //     "Copy Clean Link", depending on whether there's anything to clean.
 //   - With restored icons, labels line up and the items the option gives an
 //     icon show it.
+//   - context-menu.uc.js loads without errors, turns an old "Hide ..." option
+//     into hidden items, hides the items it's given (from every menu, with
+//     and without the defaults) and nothing else, leaves no separator out of
+//     place, and shows everything again once the list is cleared.
 
 import { spawn } from "node:child_process";
 import {
@@ -30,6 +34,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+import vm from "node:vm";
 
 import {
   extractOptionBlocks,
@@ -47,6 +52,30 @@ import { downloadZen, latestZenRelease } from "./zen_release.mjs";
 
 const ROOT = new URL("..", import.meta.url);
 const EMPTY_ICON = "data:image/svg+xml";
+
+// Items the item list hides in its runs: whole groups (Zen's Change
+// Label/Icon, the closing options, the page's Save Page As/Select All) and
+// first or last items, so separators have to be tidied up.
+const HIDDEN_ITEMS = [
+  "#context_reloadTab",
+  "#context_zen-edit-tab-title",
+  "#context_zen-edit-tab-icon",
+  "#context_closeTab",
+  "#context_closeDuplicateTabs",
+  "#context_closeTabOptions",
+  "#context_undoCloseTab",
+  "#context_moveToEnd",
+  "#context-navigation",
+  "#context-savepage",
+  "#context-selectall",
+  "#context-copylink",
+  "#context-stripOnShareLink",
+  "#context-searchselect",
+  "#context-viewpartialsource-selection",
+  "#context-sendimage",
+  "#spell-check-enabled",
+  "#frame",
+];
 
 const BROWSER_PREFS = {
   "toolkit.legacyUserProfileCustomizations.stylesheets": true,
@@ -88,6 +117,48 @@ async function setOptions(marionette, options, values) {
     `const [options, values] = arguments;
      for (const pref of options) Services.prefs.setBoolPref(pref, !!values[pref]);`,
     [options, values],
+  );
+}
+
+/**
+ * Loads context-menu.uc.js into the browser window from a chrome:// package,
+ * as Sine does, with an old option turned on to migrate.
+ *
+ * @param {Marionette} marionette
+ * @returns {Promise<{ loaded: boolean, migrated: boolean, errors: Array<string> }>}
+ */
+async function loadScript(marionette) {
+  return marionette.run(
+    `const [root] = arguments;
+     const errors = [];
+     Services.console.registerListener({
+       observe(message) {
+         if (message instanceof Ci.nsIScriptError && !(message.flags & Ci.nsIScriptError.warningFlag) &&
+             /zen-context-menu-check|Zen Context Menu/.test(message.sourceName + message.errorMessage)) {
+           errors.push(message.errorMessage + " (" + message.sourceName + ":" + message.lineNumber + ")");
+         }
+       },
+     });
+     window.zenContextMenuErrors = errors;
+     const startup = Cc["@mozilla.org/addons/addon-manager-startup;1"]
+       .getService(Ci.amIAddonManagerStartup);
+     // Kept on the window: the package goes away when this is collected.
+     window.zenContextMenuChrome = startup.registerChrome(
+       Services.io.newURI(root + "theme.json"),
+       [["content", "zen-context-menu-check", "./"]],
+     );
+     Services.prefs.setStringPref("uc.hidecontext.items", "[]");
+     Services.prefs.setBoolPref("uc.hidecontext.reloadtab", true);
+     Services.scriptloader.loadSubScriptWithOptions(
+       "chrome://zen-context-menu-check/content/context-menu.uc.js",
+       { target: window, ignoreCache: true },
+     );
+     const migrated =
+       !Services.prefs.prefHasUserValue("uc.hidecontext.reloadtab") &&
+       JSON.parse(Services.prefs.getStringPref("uc.hidecontext.items"))
+         .includes("#context_reloadTab");
+     return { loaded: !!window.ZenContextMenu, migrated, errors };`,
+    [ROOT.href],
   );
 }
 
@@ -299,6 +370,75 @@ async function main() {
           }
         }
       }
+    }
+
+    // The item list (context-menu.uc.js).
+    const script = await loadScript(marionette);
+    if (!script.loaded) {
+      fail("item list", "browser window", "context-menu.uc.js didn't load");
+    } else {
+      if (!script.migrated) {
+        fail(
+          "item list",
+          "options",
+          "the old Reload Tab option wasn't migrated",
+        );
+      }
+      // One switch also hides the item's other states ("Reload Tabs").
+      const { ALIASES } = vm.runInNewContext(
+        `${await readFile(new URL("context-menu/menus.js", ROOT), "utf8")}
+         ZenContextMenuShared;`,
+        {},
+      );
+      const hiddenIds = new Set(
+        [
+          ...HIDDEN_ITEMS,
+          ...Object.keys(ALIASES).filter((alias) =>
+            HIDDEN_ITEMS.includes(ALIASES[alias]),
+          ),
+        ].map((key) => key.slice(1)),
+      );
+      const setHidden = (keys) =>
+        marionette.run(
+          `Services.prefs.setStringPref("uc.hidecontext.items", JSON.stringify(arguments[0]));`,
+          [keys],
+        );
+      const compare = (run, baseline, menus, hiding) => {
+        for (const [menu, entries] of menus) {
+          if (!entries) continue;
+          const before = itemsOf(baseline.get(menu));
+          const after = itemsOf(entries);
+          for (const item of after) {
+            if (hiding.has(item)) fail(run, menu, `#${item} is showing`);
+            if (!before.has(item)) fail(run, menu, `makes ${item} appear`);
+          }
+          for (const item of before) {
+            if (!after.has(item) && !hiding.has(item)) {
+              fail(run, menu, `also hides ${item}`);
+            }
+          }
+        }
+      };
+      await setHidden(HIDDEN_ITEMS);
+      compare("hidden items", none, await check("hidden items", {}), hiddenIds);
+      compare(
+        "hidden items + defaults",
+        withDefaults,
+        await check("hidden items + defaults", defaults),
+        hiddenIds,
+      );
+      // Everything comes back: nothing is left hidden from before.
+      await setHidden([]);
+      compare(
+        "item list cleared",
+        none,
+        await check("item list cleared", {}),
+        new Set(),
+      );
+      const errors = await marionette.run(
+        "return window.zenContextMenuErrors;",
+      );
+      for (const error of errors ?? []) fail("item list", "script", error);
     }
     console.log();
   } finally {

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Context Menu settings</title>
+    <link rel="stylesheet" href="settings.css" />
+    <script src="menus.js"></script>
+    <script src="settings.js" defer></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="intro">
+        <h1>Context Menu</h1>
+        <p>
+          Switch off the options you never use. Everything in Zen's right-click
+          menus is listed here, including what Zen, your other mods and your
+          extensions add. Changes apply the next time you open a menu.
+        </p>
+      </header>
+
+      <p id="sample-note" class="banner" hidden>
+        This is sample data. Open this page from Zen (right-click an empty part
+        of the sidebar → <b>Customize Context Menus…</b>) to change your menus.
+      </p>
+
+      <div class="layout">
+        <div class="column">
+          <section class="card">
+            <nav
+              id="menu-tabs"
+              class="menu-tabs"
+              role="tablist"
+              aria-label="Menus"
+            ></nav>
+
+            <div class="menu-head">
+              <div class="menu-title">
+                <h2 id="menu-name"></h2>
+                <p id="menu-hint" class="muted"></p>
+              </div>
+              <div class="menu-actions">
+                <input
+                  id="filter"
+                  class="search"
+                  type="search"
+                  placeholder="Find an option"
+                  aria-label="Find an option"
+                />
+                <button id="show-all" class="button subtle" type="button">
+                  Show all
+                </button>
+              </div>
+            </div>
+
+            <div id="suggest" class="suggest" hidden>
+              <p>
+                <b>Not sure where to start?</b>
+                <span class="muted"
+                  >Hide what Zen Context Menu used to hide by default: Bookmark
+                  Tab and Bookmark Link, Reload Tab, Select All Tabs, Close
+                  Multiple Tabs, Search in a Private Window, Print Selection and
+                  Select All.</span
+                >
+              </p>
+              <button id="suggest-apply" class="button" type="button">
+                Hide these
+              </button>
+            </div>
+
+            <div id="groups" class="groups"></div>
+            <p id="no-match" class="empty" hidden></p>
+
+            <p class="muted small footnote">
+              Something missing? Extensions' items, and a few of Zen's, only
+              exist while their menu is open. Open the menu once and they'll be
+              listed here.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Appearance</h2>
+            <div id="options" class="options"></div>
+          </section>
+        </div>
+
+        <aside class="preview-wrap">
+          <div class="preview-head">
+            <span class="preview-label">Preview</span>
+            <span id="preview-count" class="muted small"></span>
+          </div>
+          <div
+            id="contexts"
+            class="segmented contexts"
+            role="group"
+            aria-label="Right-clicked on"
+            hidden
+          ></div>
+          <div id="preview" class="preview" aria-label="Menu preview"></div>
+          <p id="preview-note" class="muted small"></p>
+        </aside>
+      </div>
+    </main>
+
+    <dialog id="confirm" class="confirm">
+      <form method="dialog">
+        <p id="confirm-text"></p>
+        <div class="confirm-actions">
+          <button value="cancel" class="button">Cancel</button>
+          <button value="ok" class="button primary" id="confirm-ok">OK</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

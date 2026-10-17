@@ -25,4 +25,4 @@ jobs:
       # Keep the version in sync with the local setup in CONTRIBUTING.md so
       # local and CI formatting never disagree.
       - name: Check formatting
-        run: npx --yes prettier@3.9.9 --check "**/*.{css,mjs,md,json,yml}"
+        run: npx --yes prettier@3.9.9 --check "**/*.{css,js,mjs,html,md,json,yml}"
