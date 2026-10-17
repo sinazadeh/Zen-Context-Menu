@@ -88,7 +88,7 @@ There's no build step. `context-menu.uc.js` hides items as menus open and record
 
 ## Credits and license
 
-Zen Context Menu was created by [KiKaraage](https://github.com/KiKaraage) ([KiKaraage/ZenMods](https://github.com/KiKaraage/ZenMods)), including the preview image. This fork, Zen Calmer Context Menu, is maintained by [sinazadeh](https://github.com/sinazadeh). Both are released under the [MIT License](LICENSE).
+Zen Context Menu was created by [KiKaraage](https://github.com/KiKaraage) ([KiKaraage/ZenMods](https://github.com/KiKaraage/ZenMods)). This fork, Zen Calmer Context Menu, is maintained by [sinazadeh](https://github.com/sinazadeh). Both are released under the [MIT License](LICENSE).
 
 The settings page's format (cards with switches and a live preview, opened from the mod's gear button) follows the one [oom333/zen-tab-groups](https://github.com/oom333/zen-tab-groups) made for Tab Groups.
 
