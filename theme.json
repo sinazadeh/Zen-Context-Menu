@@ -8,11 +8,11 @@
   "preferences": "preferences.json",
   "image": "https://raw.githubusercontent.com/sinazadeh/zen-calmer-context-menu/main/image.png",
   "author": "KiKaraage, sinazadeh",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "tags": ["context menu", "declutter"],
   "fork": ["zen"],
   "createdAt": "2024-10-06",
-  "updatedAt": "2026-10-17",
+  "updatedAt": "2026-10-17T10:09:06Z",
   "scripts": {
     "context-menu.uc.js": {
       "include": ["chrome://browser/content/browser.xhtml"]

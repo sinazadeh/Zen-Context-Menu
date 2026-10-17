@@ -1,0 +1,76 @@
+# Publishes a GitHub release for every version of theme.json that doesn't
+# have one yet (scripts/publish_releases.mjs), whenever theme.json changes on
+# main. To release, bump `version` in theme.json and move the [Unreleased]
+# notes in CHANGELOG.md into a section for it: once that reaches main, the
+# release v<version> is published with those notes and a zip of
+# context-menu.uc.js, context-menu/ and chrome.css for fx-autoconfig users.
+# Sine users keep installing from the repository as before.
+#
+# Pull requests that change the release script or this workflow get a dry
+# run instead. It can also be run by hand: Actions -> Release -> Run workflow.
+
+name: Release
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "theme.json"
+      - "scripts/publish_releases.mjs"
+      - ".github/workflows/release.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "scripts/publish_releases.mjs"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish releases
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # Two runs close together would both try to publish the same version.
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          # Every release is built from its own commit on main.
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Publish missing releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/publish_releases.mjs
+
+  dry-run:
+    name: Show releases to publish
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Dry run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/publish_releases.mjs --dry-run

@@ -1,10 +1,24 @@
 # Changelog
 
 Notable changes to this fork of KiKaraage's Zen Context Menu. Versions match
-`version` in `theme.json`; bump `updatedAt` along with it, as that date is
-what tells Sine an update is available.
+`version` in `theme.json`; bump `updatedAt` along with it, as that time is
+what tells Sine an update is available. Once a version reaches `main`, it's
+published as a GitHub release with its notes below (see
+`.github/workflows/release.yml`).
 
 ## [Unreleased]
+
+## [5.1.1] - 2026-10-17
+
+### Changed
+
+- Every version from 4.0.0 on has a GitHub release with its notes and a zip
+  of `context-menu.uc.js`, `context-menu/` and `chrome.css` for
+  fx-autoconfig, and new versions are released automatically once the
+  version bump reaches `main`.
+- `updatedAt` in `theme.json` is a full timestamp, so Sine notices two
+  releases made on the same day. 5.1.0 kept 5.0.0's date, so copies of
+  5.0.0 weren't offered it; they're offered this version.
 
 ## [5.1.0] - 2026-10-17
 

@@ -27,7 +27,9 @@ description: How Sine and fx-autoconfig load Zen Calmer Context Menu - theme.jso
   repository with more than one `theme.json` as a collection of mods. Don't
   add other files with those names; `tests/theme.test.mjs` checks.
 - Sine offers an update when `updatedAt` is newer than the installed
-  copy's, so bump it (and `version`) with every release (`zcm-release`).
+  copy's, not when `version` is, so bump both with every release
+  (`zcm-release`). It's a full UTC timestamp: 5.1.0 kept 5.0.0's date and
+  copies of 5.0.0 weren't offered it.
 - Sine applies `preferences.json`'s `defaultValue`s only when its options
   box is first opened; the script sets `DEFAULT_ON` prefs on the default
   branch instead, so they apply at once and vanish with the mod.

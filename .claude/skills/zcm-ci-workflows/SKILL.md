@@ -1,6 +1,6 @@
 ---
 name: zcm-ci-workflows
-description: How CI and the development tools are set up - no package.json, the pinned ESLint and Prettier versions, the eslint.config.mjs sections, and the Tests, Prettier, ESLint, Selector targets and Menus workflows. Use when editing .github/workflows/, eslint.config.mjs, .prettierrc or scripts/, or when CI fails where local checks passed.
+description: How CI and the development tools are set up - no package.json, the pinned ESLint and Prettier versions, the eslint.config.mjs sections, and the Tests, Prettier, ESLint, Selector targets, Menus and Release workflows. Use when editing .github/workflows/, eslint.config.mjs, .prettierrc or scripts/, or when CI fails where local checks passed.
 ---
 
 # CI and tooling
@@ -21,6 +21,7 @@ npm install --no-save --package-lock=false eslint@9.7.0 @eslint/js@9.7.0 globals
 | `eslint.yml`           | push and pull requests to `main`                              | `eslint .`                                              |
 | `selector-targets.yml` | weekly, and pull requests touching `chrome.css` or `scripts/` | `check_selector_targets.mjs` for release and dev        |
 | `menus.yml`            | weekly, and pull requests touching the mod or `scripts/`      | `check_menus.mjs` in the latest Zen, headless           |
+| `release.yml`          | `theme.json` changes on `main`; a dry run on pull requests    | `publish_releases.mjs` (see `zcm-release`)              |
 
 `tests/` includes `agent_config.test.mjs`, which runs
 `scripts/lint_agent_config.mjs` on `AGENTS.md` and `.claude/`.
