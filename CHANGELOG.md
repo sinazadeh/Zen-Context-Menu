@@ -6,6 +6,8 @@ what tells Sine an update is available.
 
 ## [Unreleased]
 
+## [5.1.0] - 2026-10-17
+
 ### Added
 
 - A **Backup** card on the settings page: **Export settings…** saves the
