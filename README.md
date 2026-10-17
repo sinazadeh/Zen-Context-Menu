@@ -77,6 +77,7 @@ A few things to know:
 - Extensions' items, and a few of Zen's, only exist while their menu is open. Open the menu once and they're listed.
 - Items Zen hasn't shown yet are greyed out; in the tab menu they're under **Only in some situations** (pinned tabs, several selected tabs, or Firefox features Zen doesn't use).
 - **Customize Context Menus…** is a menu item like any other, so you can hide it too; Sine's gear button still opens the page.
+- **Backup** saves the items you've hidden and your **Appearance** settings to a file (**Export settings…**), and puts them back from one (**Import settings…**), for instance in another profile or after reinstalling. Importing replaces your current choices, after asking. The macOS switch isn't included, since it's Zen's own setting.
 - The hidden items are saved in `uc.hidecontext.items` (a list in `about:config`), and the style options as `uc.hidecontext.*` and `uc.fixcontext.*` switches. What the menus showed, for the list and the preview, is kept in `zen-context-menu.json` in your profile folder.
 
 If an item can't be hidden or an option stops doing anything after a Zen update, please [open an issue](https://github.com/sinazadeh/zen-calmer-context-menu/issues) with your Zen version (`about:support`) and the item or option's name.

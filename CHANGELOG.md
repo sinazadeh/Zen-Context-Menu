@@ -6,6 +6,14 @@ what tells Sine an update is available.
 
 ## [Unreleased]
 
+### Added
+
+- A **Backup** card on the settings page: **Export settings…** saves the
+  hidden items and the **Appearance** options to a JSON file, and **Import
+  settings…** restores them from one, after asking, for instance in another
+  profile. Files that aren't a backup, or come from a newer version of the
+  mod, are refused with a message saying why.
+
 ### Changed
 
 - Renamed to **Zen Calmer Context Menu** (Calmer Context Menu for short),

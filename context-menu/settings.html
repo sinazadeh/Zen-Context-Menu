@@ -82,6 +82,29 @@
             <h2>Appearance</h2>
             <div id="options" class="options"></div>
           </section>
+
+          <section class="card">
+            <h2>Backup</h2>
+            <p class="muted">
+              Save the options you've hidden and your appearance settings to a
+              file, to restore them later or in another profile.
+            </p>
+            <div class="backup-actions">
+              <button id="backup-export" class="button" type="button">
+                Export settings…
+              </button>
+              <button id="backup-import" class="button" type="button">
+                Import settings…
+              </button>
+              <input
+                id="backup-file"
+                type="file"
+                accept=".json,application/json"
+                hidden
+              />
+            </div>
+            <p id="backup-status" class="backup-status small" role="status"></p>
+          </section>
         </div>
 
         <aside class="preview-wrap">

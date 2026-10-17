@@ -15,6 +15,7 @@
   --menu-line: rgba(0, 0, 0, 0.1);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 6px 24px rgba(0, 0, 0, 0.05);
   --menu-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --danger: #c50042;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,6 +35,7 @@
     --menu-line: rgba(255, 255, 255, 0.1);
     --shadow: none;
     --menu-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --danger: #ff7b9c;
   }
 }
 
@@ -512,6 +514,25 @@ button.group-head:hover h3 {
   flex: 1;
   display: grid;
   gap: 2px;
+}
+
+/* ---------- backup ---------- */
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.backup-status {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+.backup-status:empty {
+  display: none;
+}
+.backup-status.error {
+  color: var(--danger);
 }
 
 /* ---------- preview ---------- */

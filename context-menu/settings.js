@@ -585,6 +585,137 @@ function renderOptions() {
   );
 }
 
+/* ---------- backup ---------- */
+
+// The mod's own options; macOS's native-menus preference is the browser's
+// and depends on the computer, so it isn't backed up.
+const BACKUP_OPTIONS = OPTIONS.map((option) => option.pref).filter((pref) =>
+  pref.startsWith("uc."),
+);
+
+function backupStatus(text, { error = false } = {}) {
+  const status = document.getElementById("backup-status");
+  status.textContent = text;
+  status.classList.toggle("error", error);
+}
+
+const plural = (count, word) => `${count} ${word}${count === 1 ? "" : "s"}`;
+
+const backupName = () =>
+  `calmer-context-menu-backup-${new Date().toISOString().slice(0, 10)}.json`;
+
+// Where to save a backup, picked in Zen's Save dialog; null if cancelled.
+// (A chrome:// page can't start a download with <a download>.)
+function pickBackupFile(name) {
+  const { nsIFilePicker } = Components.interfaces;
+  const picker =
+    Components.classes["@mozilla.org/filepicker;1"].createInstance(
+      nsIFilePicker,
+    );
+  picker.init(
+    window.browsingContext,
+    "Export settings",
+    nsIFilePicker.modeSave,
+  );
+  picker.defaultString = name;
+  picker.defaultExtension = "json";
+  picker.appendFilter("JSON", "*.json");
+  return new Promise((resolve) =>
+    picker.open((result) =>
+      resolve(result === nsIFilePicker.returnCancel ? null : picker.file.path),
+    ),
+  );
+}
+
+async function exportBackup() {
+  const options = Object.fromEntries(
+    BACKUP_OPTIONS.map((pref) => [
+      pref,
+      prefs.getBool(pref, Z.DEFAULT_ON.includes(pref)),
+    ]),
+  );
+  const text = Z.makeBackup(hidden, options);
+  const name = backupName();
+  const exported = `${plural(hidden.size, "hidden item")} and the appearance settings`;
+  if (!inZen) {
+    // The sample page, in an ordinary tab: a download.
+    const url = URL.createObjectURL(
+      new Blob([text], { type: "application/json" }),
+    );
+    const link = h("a", { href: url, download: name });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    backupStatus(`Exported ${exported}.`);
+    return;
+  }
+  let path;
+  try {
+    path = await pickBackupFile(name);
+    if (!path) {
+      return;
+    }
+    await IOUtils.writeUTF8(path, text);
+  } catch (ex) {
+    console.error("[Calmer Context Menu]", ex);
+    backupStatus("The backup couldn't be saved.", { error: true });
+    return;
+  }
+  backupStatus(`Exported ${exported} to ${PathUtils.filename(path)}.`);
+}
+
+async function importBackup(file) {
+  let backup;
+  try {
+    if (file.size > Z.BACKUP_MAX_LENGTH) {
+      throw new Error("This file is too big to be a backup.");
+    }
+    backup = Z.parseBackup(await file.text(), BACKUP_OPTIONS);
+  } catch (ex) {
+    backupStatus(ex.message, { error: true });
+    return;
+  }
+  if (
+    !(await ask(
+      `Replace your settings with this backup? It hides ${plural(backup.hidden.size, "item")}${
+        backup.options.size ? " and sets the appearance options" : ""
+      }.`,
+      "Import",
+    ))
+  ) {
+    return;
+  }
+  hidden = backup.hidden;
+  save();
+  for (const [pref, value] of backup.options) {
+    prefs.setBool(pref, value);
+  }
+  renderOptions();
+  render();
+  backupStatus(
+    `Imported ${plural(hidden.size, "hidden item")}${
+      backup.options.size ? " and the appearance settings" : ""
+    }.`,
+  );
+}
+
+document
+  .getElementById("backup-export")
+  .addEventListener("click", exportBackup);
+const backupFile = document.getElementById("backup-file");
+document
+  .getElementById("backup-import")
+  .addEventListener("click", () => backupFile.click());
+backupFile.addEventListener("change", () => {
+  const [file] = backupFile.files;
+  // Picking the same file again must fire "change" again.
+  backupFile.value = "";
+  if (file) {
+    importBackup(file);
+  }
+});
+
 /* ---------- page ---------- */
 
 function render({ focusKey } = {}) {
