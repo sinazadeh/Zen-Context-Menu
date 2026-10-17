@@ -12,8 +12,9 @@ test("theme.json has the fields Sine uses", () => {
     assert.ok(theme[field].length > 0, field);
   }
   assert.match(theme.homepage, /^https:\/\/github\.com\//);
-  // Sine offers an update when updatedAt is newer than the installed copy's.
-  assert.match(theme.updatedAt, /^\d{4}-\d{2}-\d{2}$/);
+  // Sine offers an update when updatedAt is newer than the installed copy's,
+  // so it's a full UTC timestamp: two releases on one day still differ.
+  assert.match(theme.updatedAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
   assert.ok(!Number.isNaN(Date.parse(theme.updatedAt)));
   // Not the theme store's UUID: a store copy and this fork must not collide.
   assert.notEqual(theme.id, "81fcd6b3-f014-4796-988f-6c3cb3874db8");
@@ -52,7 +53,11 @@ test("the version matches the changelog and chrome.css", async () => {
   const changelog = await read("CHANGELOG.md");
   const [, latest, date] = changelog.match(/^## \[(\d[^\]]*)\] - (\S+)/m);
   assert.equal(theme.version, latest, "latest CHANGELOG.md release");
-  assert.equal(theme.updatedAt, date, "date of the latest release");
+  assert.equal(
+    theme.updatedAt.slice(0, 10),
+    date,
+    "date of the latest release",
+  );
   const css = await read("chrome.css");
   assert.match(
     css.split("\n")[0],

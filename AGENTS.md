@@ -61,7 +61,7 @@ command.
 | touch `theme.json`, the script's start or unload, or debug "nothing happens"    | [zcm-loader](.claude/skills/zcm-loader/SKILL.md)                         |
 | fix a weekly check, or an item or option Zen broke                              | [zcm-zen-updates](.claude/skills/zcm-zen-updates/SKILL.md)               |
 | validate in Zen, or write a pull request's manual-validation notes              | [zcm-browser-validation](.claude/skills/zcm-browser-validation/SKILL.md) |
-| prepare a release                                                               | [zcm-release](.claude/skills/zcm-release/SKILL.md)                       |
+| prepare a release, or change the Release workflow or the changelog's structure  | [zcm-release](.claude/skills/zcm-release/SKILL.md)                       |
 | edit `.github/workflows/`, lint or format config, or `scripts/`                 | [zcm-ci-workflows](.claude/skills/zcm-ci-workflows/SKILL.md)             |
 
 ## Conventions for every change
@@ -106,7 +106,7 @@ Commands in `.claude/commands/` chain the agents into workflows.
 | [/zcm-check](.claude/commands/zcm-check.md)                     | Checks (add `--menus` for the run in Zen)                       |
 | [/zcm-review](.claude/commands/zcm-review.md)                   | Parallel specialist review, verified and merged into one report |
 | [/zcm-add-option](.claude/commands/zcm-add-option.md)           | Plan, implement, test, document and review a style option       |
-| [/zcm-prepare-release](.claude/commands/zcm-prepare-release.md) | Version bump, changelog section and checks                      |
+| [/zcm-prepare-release](.claude/commands/zcm-prepare-release.md) | Version bump, changelog section, checks and release dry run     |
 
 ## Static checks
 

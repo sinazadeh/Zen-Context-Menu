@@ -12,7 +12,7 @@
   "tags": ["context menu", "declutter"],
   "fork": ["zen"],
   "createdAt": "2024-10-06",
-  "updatedAt": "2026-10-17",
+  "updatedAt": "2026-10-17T05:16:20Z",
   "scripts": {
     "context-menu.uc.js": {
       "include": ["chrome://browser/content/browser.xhtml"]

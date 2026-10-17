@@ -53,7 +53,7 @@ Updating from version 4 works the same way: update the mod in Sine (with JS from
 ### Manually (fx-autoconfig)
 
 1. Set up [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig) in Zen.
-2. Copy `context-menu.uc.js` **and** the `context-menu` folder into your profile's `chrome/JS/` folder (`about:support` → Profile Folder → Open Folder).
+2. Download the zip from the [latest release](https://github.com/sinazadeh/zen-calmer-context-menu/releases/latest) and copy `context-menu.uc.js` **and** the `context-menu` folder into your profile's `chrome/JS/` folder (`about:support` → Profile Folder → Open Folder).
 3. For the style options, copy `chrome.css` into the `chrome` folder and add `@import "chrome.css";` at the top of `chrome/userChrome.css` (create it if needed), and set `toolkit.legacyUserProfileCustomizations.stylesheets` to `true` in `about:config`.
 4. In `about:support`, click **Clear startup cache…**, then restart Zen.
 
