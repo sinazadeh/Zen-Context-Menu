@@ -1,6 +1,7 @@
-// The menus Zen Context Menu manages, and the logic shared by the script that
-// runs in the browser window (context-menu.uc.js) and the settings page. Plain
-// data and pure functions only: it's also loaded by the unit tests in Node.
+// The menus Zen Context Menu Enhanced manages, and the logic shared by the
+// script that runs in the browser window (context-menu.uc.js) and the settings
+// page. Plain data and pure functions only: it's also loaded by the unit tests
+// in Node.
 //
 // Every item is known by a key. Most items have an id ("#context_pinTab"),
 // which stays the same across Zen updates and doesn't depend on the language.
@@ -287,7 +288,7 @@ var ZenContextMenuShared = (() => {
   const MODS = [
     { name: "Second Sidebar", ids: /webpanel$|^context_sb2-/ },
     { name: "Tab Groups", ids: /^context_zsg-|^zsg-/ },
-    { name: "Zen Context Menu", ids: /^toolbar-context-zcm-/ },
+    { name: "Zen Context Menu Enhanced", ids: /^toolbar-context-zcm-/ },
   ];
 
   /**

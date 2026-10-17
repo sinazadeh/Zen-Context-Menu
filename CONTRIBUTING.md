@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping keep Zen Context Menu working.
+Thanks for helping keep Zen Context Menu Enhanced working.
 
 ## Development model
 

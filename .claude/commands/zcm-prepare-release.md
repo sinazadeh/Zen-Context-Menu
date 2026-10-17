@@ -1,5 +1,5 @@
 ---
-description: Prepare a Zen Context Menu release - bump theme.json, move the [Unreleased] notes into a version section, update the chrome.css header, and run the checks.
+description: Prepare a Zen Context Menu Enhanced release - bump theme.json, move the [Unreleased] notes into a version section, update the chrome.css header, and run the checks.
 argument-hint: "<version, e.g. 5.1.0>"
 ---
 

@@ -1,5 +1,5 @@
 ---
-description: Run Zen Context Menu's checks and report what fails.
+description: Run Zen Context Menu Enhanced's checks and report what fails.
 argument-hint: "[--selectors] [--menus]"
 ---
 

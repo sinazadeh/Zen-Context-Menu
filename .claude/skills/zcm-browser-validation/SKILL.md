@@ -1,6 +1,6 @@
 ---
 name: zcm-browser-validation
-description: Validating Zen Context Menu in a real Zen - the headless Marionette harness the menu check uses, loading the script like Sine does, screenshots of the settings page, and the manual scenarios to record in a pull request. Use when a change touches menus, the script or the settings page, before claiming it works, or when writing a pull request's manual-validation notes.
+description: Validating Zen Context Menu Enhanced in a real Zen - the headless Marionette harness the menu check uses, loading the script like Sine does, screenshots of the settings page, and the manual scenarios to record in a pull request. Use when a change touches menus, the script or the settings page, before claiming it works, or when writing a pull request's manual-validation notes.
 ---
 
 # Validating in Zen
@@ -39,6 +39,6 @@ sources allowed, or fx-autoconfig. Then, as the change needs:
 - **Sine**: switch the mod off (everything shows again, no restart) and back
   on; update from the previous version (old "Hide ..." options migrate).
 
-Check the Browser Console for `[Zen Context Menu]` errors. Record the Zen
+Check the Browser Console for `[Zen Context Menu Enhanced]` errors. Record the Zen
 version (`about:support`), OS, loader and what you checked; say what you
 couldn't (macOS native menus, Windows).

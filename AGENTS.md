@@ -2,7 +2,7 @@
 
 ## Project and runtime
 
-Zen Context Menu is a mod for [Zen Browser](https://zen-browser.app) that
+Zen Context Menu Enhanced is a mod for [Zen Browser](https://zen-browser.app) that
 hides context menu items, reorders the tab context menu, restores menu icons
 and can tint menus with the current space's colors. It's a fork of
 KiKaraage's mod from the Zen theme store
