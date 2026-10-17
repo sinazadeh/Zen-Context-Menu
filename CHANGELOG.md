@@ -8,6 +8,8 @@ published as a GitHub release with its notes below (see
 
 ## [Unreleased]
 
+## [5.1.1] - 2026-10-17
+
 ### Changed
 
 - Every version from 4.0.0 on has a GitHub release with its notes and a zip
@@ -15,7 +17,8 @@ published as a GitHub release with its notes below (see
   fx-autoconfig, and new versions are released automatically once the
   version bump reaches `main`.
 - `updatedAt` in `theme.json` is a full timestamp, so Sine notices two
-  releases made on the same day: copies of 5.0.0 are now offered 5.1.0.
+  releases made on the same day. 5.1.0 kept 5.0.0's date, so copies of
+  5.0.0 weren't offered it; they're offered this version.
 
 ## [5.1.0] - 2026-10-17
 
