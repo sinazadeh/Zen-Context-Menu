@@ -1,4 +1,4 @@
-// The menus Zen Context Menu Enhanced manages, and the logic shared by the
+// The menus Zen Calmer Context Menu manages, and the logic shared by the
 // script that runs in the browser window (context-menu.uc.js) and the settings
 // page. Plain data and pure functions only: it's also loaded by the unit tests
 // in Node.
@@ -288,7 +288,7 @@ var ZenContextMenuShared = (() => {
   const MODS = [
     { name: "Second Sidebar", ids: /webpanel$|^context_sb2-/ },
     { name: "Tab Groups", ids: /^context_zsg-|^zsg-/ },
-    { name: "Zen Context Menu Enhanced", ids: /^toolbar-context-zcm-/ },
+    { name: "Calmer Context Menu", ids: /^toolbar-context-zcm-/ },
   ];
 
   /**

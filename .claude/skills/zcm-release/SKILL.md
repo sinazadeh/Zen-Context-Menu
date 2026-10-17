@@ -1,6 +1,6 @@
 ---
 name: zcm-release
-description: Releasing a version of Zen Context Menu Enhanced - theme.json version and updatedAt, the CHANGELOG.md section, and the chrome.css header the tests tie to them. Use when preparing a release or changing how versions are recorded.
+description: Releasing a version of Zen Calmer Context Menu - theme.json version and updatedAt, the CHANGELOG.md section, and the chrome.css header the tests tie to them. Use when preparing a release or changing how versions are recorded.
 ---
 
 # Releases
@@ -14,7 +14,7 @@ There's no release workflow: Sine users get a version when it reaches
 3. In `CHANGELOG.md`, move the notes under `## [Unreleased]` into
    `## [<version>] - <date>` right below it, leaving `[Unreleased]` empty.
 4. Set the version in the first line of `chrome.css`
-   (`/* Zen Context Menu Enhanced v<version>`).
+   (`/* Zen Calmer Context Menu v<version>`).
 5. Run the checks (`/zcm-check`); `tests/theme.test.mjs` fails if the three
    disagree.
 

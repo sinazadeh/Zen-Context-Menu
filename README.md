@@ -44,7 +44,7 @@ Use one copy of the mod at a time: if you have **Zen Context Menu** from Zen's m
 2. This mod runs JavaScript, so until it's listed in Sine's store, turn on **Enable installing JS from unofficial sources** in Sine's settings.
 3. In Sine's mod manager, add a mod from a repository and enter:
    ```
-   sinazadeh/zen-context-menu-enhanced
+   sinazadeh/zen-calmer-context-menu
    ```
 4. Restart Zen.
 
@@ -68,7 +68,7 @@ macOS draws its own context menus, which mods can't restyle. Hiding items works 
 Open the settings page either way:
 
 - Right-click an empty part of the sidebar (or a toolbar) → **Customize Context Menus…**
-- Click the gear button of **Zen Context Menu Enhanced** in Sine's mod list.
+- Click the gear button of **Zen Calmer Context Menu** in Sine's mod list.
 
 Pick a menu at the top and switch off what you don't use. Changes apply the next time you open the menu, in every window. Not sure where to start? The page offers to hide what version 4 hid by default (Bookmark Tab and Bookmark Link, Reload Tab, Select All Tabs, Close Multiple Tabs, Search in a Private Window, Print Selection and Select All).
 
@@ -79,7 +79,7 @@ A few things to know:
 - **Customize Context Menus…** is a menu item like any other, so you can hide it too; Sine's gear button still opens the page.
 - The hidden items are saved in `uc.hidecontext.items` (a list in `about:config`), and the style options as `uc.hidecontext.*` and `uc.fixcontext.*` switches. What the menus showed, for the list and the preview, is kept in `zen-context-menu.json` in your profile folder.
 
-If an item can't be hidden or an option stops doing anything after a Zen update, please [open an issue](https://github.com/sinazadeh/zen-context-menu-enhanced/issues) with your Zen version (`about:support`) and the item or option's name.
+If an item can't be hidden or an option stops doing anything after a Zen update, please [open an issue](https://github.com/sinazadeh/zen-calmer-context-menu/issues) with your Zen version (`about:support`) and the item or option's name.
 
 ## Development
 
@@ -87,7 +87,7 @@ There's no build step. `context-menu.uc.js` hides items as menus open and record
 
 ## Credits and license
 
-Zen Context Menu was created by [KiKaraage](https://github.com/KiKaraage) ([KiKaraage/ZenMods](https://github.com/KiKaraage/ZenMods)), including the preview image. This fork, Zen Context Menu Enhanced, is maintained by [sinazadeh](https://github.com/sinazadeh). Both are released under the [MIT License](LICENSE).
+Zen Context Menu was created by [KiKaraage](https://github.com/KiKaraage) ([KiKaraage/ZenMods](https://github.com/KiKaraage/ZenMods)), including the preview image. This fork, Zen Calmer Context Menu, is maintained by [sinazadeh](https://github.com/sinazadeh). Both are released under the [MIT License](LICENSE).
 
 The settings page's format (cards with switches and a live preview, opened from the mod's gear button) follows the one [oom333/zen-tab-groups](https://github.com/oom333/zen-tab-groups) made for Tab Groups.
 

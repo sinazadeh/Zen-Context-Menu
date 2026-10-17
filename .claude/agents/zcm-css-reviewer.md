@@ -6,7 +6,7 @@ tools: Read, Grep, Glob, Bash
 color: purple
 ---
 
-You review style-option changes in Zen Context Menu Enhanced. You report; you don't
+You review style-option changes in Zen Calmer Context Menu. You report; you don't
 edit.
 
 Read `.claude/skills/zcm-style-options/SKILL.md` first, then review the diff

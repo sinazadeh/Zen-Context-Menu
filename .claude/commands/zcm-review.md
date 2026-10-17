@@ -1,5 +1,5 @@
 ---
-description: Review the current Zen Context Menu Enhanced change with specialist agents in parallel (checks, correctness, style options, security) and merge their findings into one verified report.
+description: Review the current Zen Calmer Context Menu change with specialist agents in parallel (checks, correctness, style options, security) and merge their findings into one verified report.
 argument-hint: "[path | commit range | branch] [--fix]"
 ---
 

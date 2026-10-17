@@ -8,12 +8,13 @@ what tells Sine an update is available.
 
 ### Changed
 
-- Renamed to **Zen Context Menu Enhanced**, and the repository to
-  [sinazadeh/zen-context-menu-enhanced](https://github.com/sinazadeh/zen-context-menu-enhanced).
-  Links to the old name still lead there, and Sine keeps updating copies
-  installed from it; to install it again, add
-  `sinazadeh/zen-context-menu-enhanced`. Saved settings carry over:
-  preference names and the mod's id are unchanged.
+- Renamed to **Zen Calmer Context Menu** (Calmer Context Menu for short),
+  and the repository to
+  [sinazadeh/zen-calmer-context-menu](https://github.com/sinazadeh/zen-calmer-context-menu).
+  Links to the old names (`zen-context-menu`, `zen-context-menu-enhanced`)
+  still lead there, and Sine keeps updating copies installed from them; to
+  install it again, add `sinazadeh/zen-calmer-context-menu`. Saved settings
+  carry over: preference names and the mod's id are unchanged.
 
 ## [5.0.0] - 2026-10-17
 

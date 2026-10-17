@@ -1,4 +1,4 @@
-/* Zen Context Menu Enhanced v5.0.0
+/* Zen Calmer Context Menu v5.0.0
  * Declutter your right click menus and hide the options you don't need.
  *
  * This style sheet holds the style options (reordering the tab menu, icons,
@@ -8,7 +8,7 @@
  *
  * Originally made by KiKaraage (https://github.com/KiKaraage/ZenMods),
  * MIT License. This fork keeps it working with current Zen releases:
- * https://github.com/sinazadeh/zen-context-menu-enhanced
+ * https://github.com/sinazadeh/zen-calmer-context-menu
  *
  * Every menu entry is matched by its id. Zen and Firefox add, move and
  * re-arrange entries between releases, so position-based selectors
@@ -195,7 +195,7 @@
  * an empty slot for alignment. Entries that already have an icon of their own
  * (extensions, bookmarks, containers), checkboxes and radio buttons are left
  * alone. Not every entry has an icon: suggestions are welcome at
- * https://github.com/sinazadeh/zen-context-menu-enhanced/issues */
+ * https://github.com/sinazadeh/zen-calmer-context-menu/issues */
 @media -moz-pref("uc.fixcontext.restoreicons") {
   /* An empty image by default, and on every entry so a submenu's icon isn't
    * inherited by the entries inside it */

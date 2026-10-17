@@ -614,7 +614,7 @@ async function refresh() {
   try {
     catalog = await api.catalog();
   } catch (ex) {
-    console.error("[Zen Context Menu Enhanced]", ex);
+    console.error("[Calmer Context Menu]", ex);
   }
   render();
 }

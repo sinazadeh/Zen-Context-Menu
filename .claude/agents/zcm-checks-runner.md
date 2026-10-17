@@ -1,6 +1,6 @@
 ---
 name: zcm-checks-runner
-description: Runs Zen Context Menu Enhanced's static checks (Node tests including the agent-config lint, Prettier, ESLint, whitespace) and, when asked or when the mod changed, the selector-target check, then reports a short pass/fail summary with the failing output. Use PROACTIVELY before committing, and whenever a workflow needs the checks' results.
+description: Runs Zen Calmer Context Menu's static checks (Node tests including the agent-config lint, Prettier, ESLint, whitespace) and, when asked or when the mod changed, the selector-target check, then reports a short pass/fail summary with the failing output. Use PROACTIVELY before committing, and whenever a workflow needs the checks' results.
 model: haiku
 tools: Bash, Read, Grep, Glob
 color: yellow
