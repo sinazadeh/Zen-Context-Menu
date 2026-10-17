@@ -196,8 +196,10 @@
   }
 }
 
-/* Faint separators: the lines between groups of options at half strength */
-@media -moz-pref("uc.fixcontext.faintseparators") {
+/* Faint separators: the lines between groups of options at half strength.
+ * An alternative to hiding them (see EXCLUSIVE_OPTIONS in menus.js), which
+ * wins when both are on. */
+@media -moz-pref("uc.fixcontext.faintseparators") and (not -moz-pref("uc.hidecontext.separators")) {
   menuseparator::before {
     opacity: 0.5 !important;
   }
@@ -239,8 +241,9 @@
 /* Apply the Zen space gradient to menus and panels. Zen paints the gradient
  * on #zen-browser-background rather than on :root, so menus can't inherit
  * it; -moz-element() paints that element into the menu instead. Windows
- * without it (Library, dialogs) keep the regular panel color. */
-@media -moz-pref("uc.fixcontext.applyzengradient") {
+ * without it (Library, dialogs) keep the regular panel color. An alternative
+ * to the space's accent color, which wins when both are on. */
+@media -moz-pref("uc.fixcontext.applyzengradient") and (not -moz-pref("uc.fixcontext.applyzenaccent")) {
   menupopup,
   panel {
     --panel-background-color:
@@ -329,8 +332,9 @@
  * an empty slot for alignment. Entries that already have an icon of their own
  * (extensions, bookmarks, containers), checkboxes and radio buttons are left
  * alone. Not every entry has an icon: suggestions are welcome at
- * https://github.com/sinazadeh/zen-calmer-context-menu/issues */
-@media -moz-pref("uc.fixcontext.restoreicons") {
+ * https://github.com/sinazadeh/zen-calmer-context-menu/issues
+ * An alternative to hiding icons, which wins when both are on. */
+@media -moz-pref("uc.fixcontext.restoreicons") and (not -moz-pref("uc.hidecontext.icons")) {
   /* An empty image by default, and on every entry so a submenu's icon isn't
    * inherited by the entries inside it */
   :where(menu, menuitem) {

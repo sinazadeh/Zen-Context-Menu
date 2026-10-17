@@ -383,3 +383,41 @@ test("a backup keeps the folded items and the icon style", () => {
     /folded items is damaged/,
   );
 });
+
+test("alternative options: the first of a group that's on wins", () => {
+  const on =
+    (...prefs) =>
+    (pref) =>
+      prefs.includes(pref);
+  assert.deepEqual(plain(Z.conflictingOptions(on())), []);
+  assert.deepEqual(
+    plain(
+      Z.conflictingOptions(
+        on(
+          "uc.fixcontext.restoreicons",
+          "uc.hidecontext.icons",
+          "uc.fixcontext.faintseparators",
+        ),
+      ),
+    ),
+    ["uc.fixcontext.restoreicons"],
+  );
+  for (const group of Z.EXCLUSIVE_OPTIONS) {
+    for (const pref of group) {
+      const option = preferences.find((p) => p.property === pref);
+      assert.equal(option?.type, "checkbox", pref);
+      // One that's on by default would switch the others off on its own.
+      assert.ok(!Z.DEFAULT_ON.includes(pref), pref);
+    }
+  }
+});
+
+test("the settings page shows each group of alternatives as one choice", async () => {
+  const settings = await read("context-menu/settings.js");
+  for (const group of Z.EXCLUSIVE_OPTIONS) {
+    const at = group.map((pref) => settings.indexOf(`pref: "${pref}"`));
+    assert.ok(Math.min(...at) >= 0, group.join(", "));
+    const between = settings.slice(Math.min(...at), Math.max(...at));
+    assert.doesNotMatch(between, /\btitle:/, `${group.join(", ")} are apart`);
+  }
+});

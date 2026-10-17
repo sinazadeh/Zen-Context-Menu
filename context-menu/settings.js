@@ -54,8 +54,12 @@ const isMac = inZen
 
 /* ---------- options ---------- */
 
-// The style options of chrome.css (see preferences.json): switches, and
-// options with `choices` (a preference with one of their ids as its value).
+// The style options of chrome.css (see preferences.json), each one row:
+// - a switch: `pref`;
+// - a choice of values for one preference: `pref` and `choices` with ids;
+// - a choice between alternatives (Z.EXCLUSIVE_OPTIONS): `choices`, each
+//   switching its own `pref` on and the others off (none for "neither").
+// `needs` says when an option has an effect; it's dimmed otherwise.
 const OPTIONS = [
   {
     pref: "uc.fixcontext.ergonomicsfortabs",
@@ -78,45 +82,55 @@ const OPTIONS = [
     text: "Hide the options Zen shows greyed out, like Paste with nothing copied or Undo with nothing to undo.",
   },
   {
-    pref: "uc.fixcontext.restoreicons",
-    title: "Icons for every option",
-    text: "Show an icon next to each option, like Zen did before 1.12.9b.",
+    title: "Icons",
+    text: "Zen's: only the ones Zen shows (extensions, containers...). Every option: one next to each, like Zen before 1.12.9b. None: only checkmarks.",
+    choices: [
+      { id: "zen", name: "Zen's" },
+      { id: "every", name: "Every option", pref: "uc.fixcontext.restoreicons" },
+      { id: "none", name: "None", pref: "uc.hidecontext.icons" },
+    ],
   },
   {
     pref: "uc.fixcontext.iconpack",
     title: "Icon style",
-    text: "For the icons above and the quick actions. Fluent and ZenUI are from Context Menu Icons by Starry-AXQG.",
+    text: "For the icons of every option and the quick actions. Fluent and ZenUI are from Context Menu Icons by Starry-AXQG.",
     choices: Z.ICON_PACKS,
-  },
-  {
-    pref: "uc.hidecontext.icons",
-    title: "No icons",
-    text: "Hide the icons menus show (extensions, containers...), except checkmarks.",
+    samples: true,
+    needs: () =>
+      (isOn("uc.fixcontext.restoreicons") && !isOn("uc.hidecontext.icons")) ||
+      isOn("uc.fixcontext.tabactions"),
   },
   {
     pref: "uc.fixcontext.grayscaleicons",
     title: "Gray extension icons",
     text: "Draw the icons of extensions' options in grays, in color again under the pointer.",
+    needs: () => !isOn("uc.hidecontext.icons"),
   },
   {
-    pref: "uc.hidecontext.separators",
-    title: "No separators",
-    text: "Hide the lines between groups of options.",
+    title: "Separators",
+    text: "The lines between groups of options.",
+    choices: [
+      { id: "lines", name: "Lines" },
+      { id: "faint", name: "Faint", pref: "uc.fixcontext.faintseparators" },
+      { id: "none", name: "None", pref: "uc.hidecontext.separators" },
+    ],
   },
   {
-    pref: "uc.fixcontext.faintseparators",
-    title: "Faint separators",
-    text: "Draw the lines between groups of options at half strength.",
-  },
-  {
-    pref: "uc.fixcontext.applyzengradient",
-    title: "Space gradient",
-    text: "Paint menus and other pop-ups with your space's gradient.",
-  },
-  {
-    pref: "uc.fixcontext.applyzenaccent",
-    title: "Space color",
-    text: "Tint menus and other pop-ups with your space's main color.",
+    title: "Menu color",
+    text: "Paint menus and other pop-ups with your space's gradient, or tint them with its main color.",
+    choices: [
+      { id: "theme", name: "Theme's" },
+      {
+        id: "gradient",
+        name: "Space gradient",
+        pref: "uc.fixcontext.applyzengradient",
+      },
+      {
+        id: "color",
+        name: "Space color",
+        pref: "uc.fixcontext.applyzenaccent",
+      },
+    ],
   },
   {
     pref: "widget.macos.native-context-menus",
@@ -127,7 +141,25 @@ const OPTIONS = [
   },
 ];
 
+const isOn = (pref) => prefs.getBool(pref, Z.DEFAULT_ON.includes(pref));
+
+// The alternative that's on: the first of its group (as in chrome.css) if
+// several are, the one without a preference if none is.
+function alternativeValue(option) {
+  const group = Z.EXCLUSIVE_OPTIONS.find((g) =>
+    option.choices.some((choice) => g.includes(choice.pref)),
+  );
+  const on = group.find(isOn);
+  return (
+    option.choices.find((choice) => choice.pref === on) ??
+    option.choices.find((choice) => !choice.pref)
+  ).id;
+}
+
 const optionValue = (option) => {
+  if (option.choices && !option.pref) {
+    return alternativeValue(option);
+  }
   if (option.choices) {
     const value = prefs.getString(option.pref, option.choices[0].id);
     return option.choices.some(({ id }) => id === value)
@@ -138,6 +170,23 @@ const optionValue = (option) => {
   const value = prefs.getBool(option.pref, fallback);
   return option.invert ? !value : value;
 };
+
+function pick(option, id) {
+  if (option.pref) {
+    prefs.setString(option.pref, id);
+  } else {
+    // Off first, so two are never on at once.
+    const choices = [...option.choices].sort(
+      (a, b) => (a.id === id) - (b.id === id),
+    );
+    for (const choice of choices) {
+      if (choice.pref) {
+        prefs.setBool(choice.pref, choice.id === id);
+      }
+    }
+  }
+  renderOptions();
+}
 
 /* ---------- helpers ---------- */
 
@@ -660,21 +709,24 @@ const sampleIcons = (pack) =>
       : `icons/${pack}/${name}.svg`,
   );
 
-function renderChoices(option) {
+const optionText = (option) =>
+  h(
+    "span",
+    { class: "option-text" },
+    h("b", {}, option.title),
+    h("span", { class: "muted" }, option.text),
+  );
+
+function renderChoices(option, inactive) {
   const value = optionValue(option);
   return h(
     "div",
-    { class: "option" },
-    h(
-      "span",
-      { class: "option-text" },
-      h("b", {}, option.title),
-      h("span", { class: "muted" }, option.text),
-    ),
+    { class: `option${inactive ? " inactive" : ""}` },
+    optionText(option),
     h(
       "div",
       {
-        class: "segmented choices",
+        class: `segmented choices${option.samples ? " with-samples" : ""}`,
         role: "radiogroup",
         "aria-label": option.title,
       },
@@ -686,12 +738,11 @@ function renderChoices(option) {
             role: "radio",
             class: choice.id === value ? "selected" : "",
             "aria-checked": String(choice.id === value),
-            onclick: () => {
-              prefs.setString(option.pref, choice.id);
-              renderOptions();
-            },
+            onclick: () => pick(option, choice.id),
           },
-          h("span", { class: "samples" }, sampleIcons(choice.id).map(icon)),
+          option.samples
+            ? h("span", { class: "samples" }, sampleIcons(choice.id).map(icon))
+            : null,
           choice.name,
         ),
       ),
@@ -701,18 +752,15 @@ function renderChoices(option) {
 
 function renderOptions() {
   document.getElementById("options").replaceChildren(
-    ...OPTIONS.filter((option) => !option.macOnly || isMac).map((option) =>
-      option.choices
-        ? renderChoices(option)
+    ...OPTIONS.filter((option) => !option.macOnly || isMac).map((option) => {
+      // Dimmed, but still there to set up ahead.
+      const inactive = option.needs && !option.needs();
+      return option.choices
+        ? renderChoices(option, inactive)
         : h(
             "label",
-            { class: "option" },
-            h(
-              "span",
-              { class: "option-text" },
-              h("b", {}, option.title),
-              h("span", { class: "muted" }, option.text),
-            ),
+            { class: `option${inactive ? " inactive" : ""}` },
+            optionText(option),
             h("input", {
               type: "checkbox",
               class: "switch",
@@ -723,8 +771,8 @@ function renderOptions() {
                   option.invert ? !e.target.checked : e.target.checked,
                 ),
             }),
-          ),
-    ),
+          );
+    }),
   );
 }
 
@@ -732,11 +780,15 @@ function renderOptions() {
 
 // The mod's own options; macOS's native-menus preference is the browser's
 // and depends on the computer, so it isn't backed up.
-const BACKUP_OPTIONS = OPTIONS.filter(
-  (option) => option.pref.startsWith("uc.") && !option.choices,
-).map((option) => option.pref);
+const BACKUP_OPTIONS = OPTIONS.flatMap((option) =>
+  option.choices
+    ? option.pref
+      ? []
+      : option.choices.map((choice) => choice.pref).filter(Boolean)
+    : [option.pref],
+).filter((pref) => pref.startsWith("uc."));
 const BACKUP_CHOICES = Object.fromEntries(
-  OPTIONS.filter((option) => option.choices).map((option) => [
+  OPTIONS.filter((option) => option.choices && option.pref).map((option) => [
     option.pref,
     option.choices.map(({ id }) => id),
   ]),
@@ -782,10 +834,9 @@ async function exportBackup() {
       pref,
       prefs.getBool(pref, Z.DEFAULT_ON.includes(pref)),
     ]),
-    ...OPTIONS.filter((option) => option.choices).map((option) => [
-      option.pref,
-      optionValue(option),
-    ]),
+    ...OPTIONS.filter((option) => option.choices && option.pref).map(
+      (option) => [option.pref, optionValue(option)],
+    ),
   ]);
   const text = Z.makeBackup(hidden, options, new Date(), folded);
   const name = backupName();
@@ -846,7 +897,17 @@ async function importBackup(file) {
   hidden = backup.hidden;
   folded = backup.folded;
   save();
-  for (const [pref, value] of backup.options) {
+  // At most one of each group of alternatives (an older backup can have
+  // two), and the ones switched off first.
+  for (const pref of Z.conflictingOptions(
+    (p) => backup.options.get(p) === true,
+  )) {
+    backup.options.set(pref, false);
+  }
+  const options = [...backup.options].sort(
+    ([, a], [, b]) => (a === true) - (b === true),
+  );
+  for (const [pref, value] of options) {
     if (typeof value === "boolean") {
       prefs.setBool(pref, value);
     } else {

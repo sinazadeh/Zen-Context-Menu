@@ -28,11 +28,11 @@ Declutter your right click menus: switch off any option you never use, or tuck i
   - Quick actions: Reload, Pin, Add to Essentials and Bookmark as a row of buttons at the top of the tab context menu, with their names as tooltips
   - Show "Copy Clean Link" instead of "Copy Link" when it would remove tracking parameters, and only "Copy Link" when there's nothing to remove _(on by default)_
   - Hide unavailable options: the ones Zen shows greyed out, like Paste with nothing copied or Undo with nothing to undo
-  - Restore icons for context menu options, like Zen had them before 1.12.9b, lined up in one column whatever padding your theme gives menu items and drawn in the color of the menu's text (so they show on dark themes that only color the labels)
-  - An icon style for those icons and the quick actions: Zen's own, **Fluent** or **ZenUI**, both from [Context Menu Icons](https://github.com/Starry-AXQG/Context-Menu-Icons)
-  - Hide the icons in context menus (extension items, containers...), except checkboxes and radio buttons, or draw extensions' icons in grays
-  - Hide all separators, or draw them at half strength
-  - Apply your space's gradient or accent color to menus, tab previews and other small pop-ups
+  - Icons: the ones Zen shows (extensions, containers...), one for **every option** like Zen had them before 1.12.9b, or **none** but checkmarks. Restored icons line up in one column whatever padding your theme gives menu items, and are drawn in the color of the menu's text (so they show on dark themes that only color the labels)
+  - An icon style for restored icons and the quick actions: Zen's own, **Fluent** or **ZenUI**, both from [Context Menu Icons](https://github.com/Starry-AXQG/Context-Menu-Icons)
+  - Draw extensions' icons in grays
+  - Separators: lines, **faint** lines, or **none**
+  - Menu color: your theme's, your space's **gradient**, or its **accent color**, for menus, tab previews and other small pop-ups
 
 Coming from version 4 or the theme store version? The "Hide ..." options you had on become hidden items the first time version 5 runs, so your menus stay the way they were.
 
@@ -82,7 +82,8 @@ A few things to know:
 - Items Zen hasn't shown yet are greyed out; in the tab menu they're under **Only in some situations** (pinned tabs, several selected tabs, or Firefox features Zen doesn't use).
 - **Customize Context Menus…** is a menu item like any other, so you can hide it too; Sine's gear button still opens the page.
 - **More** next to an item (shown when you point at it) moves it into **More options** at the end of its menu; click **In More options** to put it back. The preview shows where it went. Holding <kbd>Shift</kbd> while right-clicking shows the whole menu, for the menus Zen's own interface opens (tabs, sidebar, toolbars, bookmarks); a page's menu is opened by the page's process, which doesn't tell.
-- **Icon style** picks Zen's icons, Fluent or ZenUI for **Icons for every option** and the quick actions; the list shows the picked style's icons.
+- **Icons**, **Separators** and **Menu color** are one choice each: in Sine's options and `about:config` they're separate switches (shared with the theme store version), and switching one on switches its alternative off. With `chrome.css` alone, hiding icons or separators wins over restoring or fading them, and the accent color over the gradient.
+- **Icon style** picks Zen's icons, Fluent or ZenUI for restored icons and the quick actions; the list shows the picked style's icons. It's dimmed while neither is on, and so is **Gray extension icons** with no icons.
 - **Backup** saves the items you've hidden or moved to **More options** and your **Appearance** settings to a file (**Export settings…**), and puts them back from one (**Import settings…**), for instance in another profile or after reinstalling. Importing replaces your current choices, after asking. The macOS switch isn't included, since it's Zen's own setting.
 - The hidden items are saved in `uc.hidecontext.items` and the ones in **More options** in `uc.hidecontext.folded` (lists in `about:config`), the style options as `uc.hidecontext.*` and `uc.fixcontext.*` switches, and the icon style in `uc.fixcontext.iconpack` (`zen`, `fluent` or `zenui`). What the menus showed, for the list and the preview, is kept in `zen-context-menu.json` in your profile folder.
 

@@ -86,3 +86,28 @@ test("hiding unavailable options covers the menus the settings page lists", asyn
   const menus = [...block.matchAll(/#([\w-]+)/g)].map((m) => m[1]);
   assert.deepEqual(menus.sort(), Array.from(Z.MENUS, (menu) => menu.id).sort());
 });
+
+test("an alternative option only applies while the one it gives way to is off", async () => {
+  // EXCLUSIVE_OPTIONS in menus.js: when two are on anyway (chrome.css on its
+  // own, without the script), the first of the group wins.
+  const { readFile: read } = await import("node:fs/promises");
+  const vm = await import("node:vm");
+  const Z = vm.runInNewContext(
+    `${await read(new URL("../context-menu/menus.js", import.meta.url), "utf8")}; ZenContextMenuShared`,
+    {},
+  );
+  for (const [first, ...others] of Z.EXCLUSIVE_OPTIONS) {
+    for (const pref of others) {
+      const media = code.match(
+        new RegExp(
+          `@media -moz-pref\\("${pref.replaceAll(".", "\\.")}"\\)[^{]*\\{`,
+        ),
+      );
+      assert.ok(media, `no block for ${pref}`);
+      assert.ok(
+        media[0].includes(`and (not -moz-pref("${first}"))`),
+        `${pref} doesn't give way to ${first}`,
+      );
+    }
+  }
+});

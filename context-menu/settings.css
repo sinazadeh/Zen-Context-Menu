@@ -550,9 +550,13 @@ button.group-head:hover h3 {
   flex-wrap: wrap;
   cursor: default;
 }
+/* Has no effect with the other options as they are */
+.option.inactive {
+  opacity: 0.5;
+}
 
 /* The icon styles, each with a few of its icons */
-.choices button {
+.choices.with-samples button {
   display: inline-flex;
   flex-direction: column;
   align-items: center;

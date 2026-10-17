@@ -91,6 +91,38 @@
     }
   }
 
+  // Options that are alternatives (Z.EXCLUSIVE_OPTIONS): switching one on
+  // switches the others of its group off, wherever it's done (the settings
+  // page, Sine's options, about:config). Two already on (from before this
+  // existed) keep the one chrome.css shows.
+  const isOn = (pref) => Services.prefs.getBoolPref(pref, false);
+  function watchExclusiveOptions() {
+    for (const pref of Z.conflictingOptions(isOn)) {
+      Services.prefs.setBoolPref(pref, false);
+    }
+    const observer = {
+      observe(_subject, _topic, pref) {
+        if (!isOn(pref)) {
+          return;
+        }
+        const group = Z.EXCLUSIVE_OPTIONS.find((g) => g.includes(pref));
+        for (const other of group) {
+          if (other !== pref && isOn(other)) {
+            Services.prefs.setBoolPref(other, false);
+          }
+        }
+      },
+    };
+    for (const pref of Z.EXCLUSIVE_OPTIONS.flat()) {
+      Services.prefs.addObserver(pref, observer);
+    }
+    cleanups.push(() => {
+      for (const pref of Z.EXCLUSIVE_OPTIONS.flat()) {
+        Services.prefs.removeObserver(pref, observer);
+      }
+    });
+  }
+
   /* ---------- reading items ---------- */
 
   /** @returns {object} an ItemInfo (see menus.js) */
@@ -1138,6 +1170,7 @@
     setDefaultPrefs();
     migrateLegacyPrefs();
     readHidden();
+    watchExclusiveOptions();
     loadIconPacks().catch(log);
 
     window.addEventListener("popupshowing", onPopupShowing);

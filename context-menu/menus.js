@@ -429,6 +429,32 @@ var ZenContextMenuShared = (() => {
   ];
   const PREF_ICON_PACK = "uc.fixcontext.iconpack";
 
+  /**
+   * Options that are alternatives to each other: different looks for the
+   * same thing, so at most one of each group is on. They stay separate
+   * preferences (the names are shared with the theme store version), the
+   * settings page shows each group as one choice, and the script switches
+   * the others of a group off when one is switched on. When more than one is
+   * on anyway (chrome.css without the script, an old backup), the first
+   * wins: chrome.css only applies the others while it's off.
+   */
+  const EXCLUSIVE_OPTIONS = [
+    ["uc.hidecontext.icons", "uc.fixcontext.restoreicons"],
+    ["uc.hidecontext.separators", "uc.fixcontext.faintseparators"],
+    ["uc.fixcontext.applyzenaccent", "uc.fixcontext.applyzengradient"],
+  ];
+
+  /**
+   * The options to switch off so that at most one of each EXCLUSIVE_OPTIONS
+   * group is on, the first one winning.
+   *
+   * @param {(pref: string) => boolean} isOn whether an option is on
+   * @returns {Array<string>}
+   */
+  function conflictingOptions(isOn) {
+    return EXCLUSIVE_OPTIONS.flatMap((group) => group.filter(isOn).slice(1));
+  }
+
   /** Firefox's id for an extension's menu items (ext-menus.js). */
   const widgetId = (extensionId) =>
     String(extensionId)
@@ -779,6 +805,8 @@ var ZenContextMenuShared = (() => {
     DEFAULT_ON,
     ICON_PACKS,
     PREF_ICON_PACK,
+    EXCLUSIVE_OPTIONS,
+    conflictingOptions,
     PREF_HIDDEN: "uc.hidecontext.items",
     PREF_FOLDED: "uc.hidecontext.folded",
     widgetId,

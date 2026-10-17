@@ -75,6 +75,27 @@ version. The old "Hide ..." options live on only in `LEGACY_PREFS`.
   opacity. Themes that color labels but not items otherwise get black
   icons.
 
+## Alternatives
+
+Options that style the same thing differently are alternatives
+(`EXCLUSIVE_OPTIONS` in `menus.js`): hide/restore icons, hide/faint
+separators, accent/gradient. They stay separate boolean preferences (names
+are shared with the theme store version; never merge them into a new one),
+but:
+
+- the settings page shows each group as one choice (`choices` with a
+  `pref` each), and `parseBackup`'s caller drops all but the winner;
+- the script switches the others of a group off when one is switched on,
+  wherever (Sine's checkboxes, `about:config`), and at startup;
+- in `chrome.css` the first of a group wins: the others' blocks are
+  `@media -moz-pref("x") and (not -moz-pref("first"))`, so the CSS alone
+  is consistent. The first is the one that showed when both were on before.
+
+Tests check all three. A new option that restyles something an existing
+one does belongs in a group, not next to it; one on by default can't be in
+a group. Options that only matter with another (Icon style, Gray extension
+icons) take `needs` on the settings page, which dims them otherwise.
+
 ## Icon styles
 
 `uc.fixcontext.iconpack` (a string: `zen`, `fluent`, `zenui`; a

@@ -32,6 +32,17 @@ published as a GitHub release with its notes below (see
   spaces), frames, PDF editing, Copy Email/Phone, Copy Text From Image,
   saved passwords, dictionaries, playback speed, Link Preview and more.
 
+### Changed
+
+- Options that are alternatives are one choice each on the settings page:
+  **Icons** (Zen's, every option or none), **Separators** (lines, faint or
+  none) and **Menu color** (theme's, space gradient or space color).
+  Switching one on in Sine's options switches its alternative off. Before,
+  "Icons for every option" and "No icons" could both be on, which hid the
+  icons but kept the restored icons' spacing, and the space gradient and
+  color mixed; if you had both on, you keep what you saw: no icons, and the
+  space color.
+
 ### Fixed
 
 - "Icons for every option" lines icons and labels up in one column whatever
